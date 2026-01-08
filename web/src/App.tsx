@@ -22,6 +22,24 @@ function App() {
     if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
+
+    // Proactive SW update check
+    const checkUpdates = async () => {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          registration.update();
+        }
+      }
+    };
+
+    window.addEventListener('focus', checkUpdates);
+    const updateInterval = setInterval(checkUpdates, 1000 * 60 * 60); // Every hour
+
+    return () => {
+      window.removeEventListener('focus', checkUpdates);
+      clearInterval(updateInterval);
+    };
   }, []);
 
   // Sync local changes to remote when items/categories change
