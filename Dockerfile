@@ -13,45 +13,31 @@ COPY web/ .
 RUN npm run build
 
 # -----------------------------------------------------------------------------
-# Stage 2: Build Backend (Go)
-# -----------------------------------------------------------------------------
-FROM golang:1.22-alpine AS backend-builder
-WORKDIR /app
-
-# Install build dependencies
-RUN apk add --no-cache git
-
-# Copy Go module files
-COPY go.mod ./
-RUN go mod tidy
-
-# Copy main.go from project root
-COPY main.go ./
-
-# Copy built frontend assets to web/dist (as expected by embed)
-COPY --from=frontend-builder /app/web/dist ./web/dist
-
-# Build static binary
-RUN CGO_ENABLED=0 go build \
-    -ldflags="-s -w" \
-    -o /shoplist \
-    ./main.go
-
-# -----------------------------------------------------------------------------
-# Stage 3: Final Image 
+# Stage 2: Final Image with PocketBase
 # -----------------------------------------------------------------------------
 FROM alpine:latest
 
 WORKDIR /app
 
-# Install CA certificates for HTTPS
-RUN apk add --no-cache ca-certificates
+# Install dependencies
+RUN apk add --no-cache ca-certificates wget unzip
 
-# Copy binary
-COPY --from=backend-builder /shoplist /app/shoplist
+# Download and install PocketBase
+ARG POCKETBASE_VERSION=0.22.21
+ARG TARGETARCH
+RUN wget -q https://github.com/pocketbase/pocketbase/releases/download/v${POCKETBASE_VERSION}/pocketbase_${POCKETBASE_VERSION}_linux_${TARGETARCH}.zip \
+    && unzip pocketbase_${POCKETBASE_VERSION}_linux_${TARGETARCH}.zip -d /app \
+    && rm pocketbase_${POCKETBASE_VERSION}_linux_${TARGETARCH}.zip \
+    && chmod +x /app/pocketbase
+
+# Copy frontend build to pb_public (PocketBase serves this automatically)
+COPY --from=frontend-builder /app/web/dist /app/pb_public
+
+# Copy migrations if they exist
+COPY pb_migrations /app/pb_migrations
 
 # Create data directory
-RUN mkdir /pb_data
+RUN mkdir -p /pb_data
 
 # Expose port
 EXPOSE 8090
@@ -59,5 +45,5 @@ EXPOSE 8090
 # Persistence Volume
 VOLUME /pb_data
 
-# Run
-CMD ["/app/shoplist", "serve", "--http=0.0.0.0:8090"]
+# Run PocketBase
+CMD ["/app/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data"]
