@@ -23,24 +23,22 @@ RUN apk add --no-cache git
 
 # Copy Go module files
 COPY go.mod ./
-# COPY go.sum ./ # Not created yet, will be created by 'go mod tidy' inside container if we were running interactively, but here we might fail if go.sum is missing. 
-# We'll run 'go mod tidy' during build for this initial setup since we don't have local Go.
 RUN go mod tidy
 
-# Copy Go source
-COPY cmd/ ./cmd/
-# Copy built frontend assets to the expected embed location (relative to main.go)
-COPY --from=frontend-builder /app/web/dist ./cmd/server/web/dist
+# Copy main.go from project root
+COPY main.go ./
+
+# Copy built frontend assets to web/dist (as expected by embed)
+COPY --from=frontend-builder /app/web/dist ./web/dist
 
 # Build static binary
-# -ldflags="-s -w" strips debug info for smaller binary
 RUN CGO_ENABLED=0 go build \
     -ldflags="-s -w" \
     -o /shoplist \
-    ./cmd/server/main.go
+    ./main.go
 
 # -----------------------------------------------------------------------------
-# Stage 3: Final Image (Scratch/Alpine)
+# Stage 3: Final Image 
 # -----------------------------------------------------------------------------
 FROM alpine:latest
 
