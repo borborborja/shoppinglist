@@ -14,7 +14,8 @@ function App() {
 
   // Auto-reconnect to sync on app mount
   useEffect(() => {
-    const savedCode = localStorage.getItem('shopListSyncCode');
+    const { sync } = useShopStore.getState();
+    const savedCode = sync.code || localStorage.getItem('shopListSyncCode');
     if (savedCode && navigator.onLine) {
       reconnectSync(savedCode);
     }

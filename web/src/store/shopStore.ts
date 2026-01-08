@@ -147,7 +147,14 @@ export const useShopStore = create<ShopState>()(
                 viewMode: state.viewMode,
                 isDark: state.isDark,
                 isAmoled: state.isAmoled,
-                sync: { ...state.sync, msg: '', connected: false },
+                // Keep code/recordId for reconnection, but reset connection status
+                sync: {
+                    connected: false,
+                    code: state.sync.code,
+                    recordId: state.sync.recordId,
+                    msg: '',
+                    msgType: 'info' as const
+                },
                 auth: state.auth
             })
         }
