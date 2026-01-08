@@ -54,11 +54,14 @@ function App() {
 
     window.addEventListener('focus', checkUpdates);
     window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', checkUpdates);
+
     const updateInterval = setInterval(checkUpdates, 1000 * 60 * 30); // Every 30 mins
 
     return () => {
       window.removeEventListener('focus', checkUpdates);
       window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', checkUpdates);
       clearInterval(updateInterval);
     };
   }, []);
