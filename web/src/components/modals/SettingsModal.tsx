@@ -163,6 +163,15 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
     // --- Tab Render ---
     const renderAccountTab = () => (
         <div className="space-y-6 animate-fade-in">
+            {/* Brand Identity */}
+            <div className="flex flex-col items-center justify-center py-2 animate-pop">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-500/20 overflow-hidden p-2.5 mb-2">
+                    <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <h2 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">ShopList</h2>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em]">{t.appTitle}</p>
+            </div>
+
             {/* Sync Section */}
             <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30">
                 <h4 className="text-xs font-bold text-blue-500 uppercase mb-3 tracking-wider flex items-center gap-2"><Server size={12} /> {t.sync}</h4>
