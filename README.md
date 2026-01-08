@@ -1,8 +1,10 @@
-# 🛒 ShopList
+# <img src="web/public/icon.png" width="48" height="48" valign="middle"> ShopList
 
 A modern, self-hosted shopping list application with real-time synchronization.
 
 **Tech Stack:** Go (PocketBase) + React (Vite, TypeScript, TailwindCSS v4) + Docker
+
+![ShopList Logo](web/public/icon.png)
 
 ![ShopList Screenshot](./docs/screenshot.png)
 
