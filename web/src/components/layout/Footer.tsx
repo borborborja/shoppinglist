@@ -52,7 +52,7 @@ const Footer = ({ installPrompt, onInstall }: FooterProps) => {
                     </div>
                     <div className="flex flex-col items-center gap-0.5">
                         <div className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">
-                            &copy; ShopList v2.5 (2026-01-08-1825)
+                            &copy; ShopList v2.6 (2026-01-08-1830)
                         </div>
                         {sync.connected && sync.lastSync && (
                             <div className="text-[8px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-tight flex items-center gap-1">

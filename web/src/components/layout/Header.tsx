@@ -1,4 +1,4 @@
-import { ShoppingBasket, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations } from '../../data/constants';
 
@@ -14,8 +14,8 @@ const Header = ({ openSettings }: HeaderProps) => {
         <header className="fixed top-0 w-full z-40 glass transition-all duration-300 h-16">
             <div className="max-w-3xl mx-auto px-4 h-full flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                        <ShoppingBasket size={20} />
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 overflow-hidden p-1.5">
+                        <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 hidden sm:block">
                         {t.appTitle}
@@ -27,8 +27,8 @@ const Header = ({ openSettings }: HeaderProps) => {
                         <button
                             onClick={() => setAppMode('planning')}
                             className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${appMode === 'planning'
-                                    ? 'bg-white dark:bg-darkSurface text-blue-600 dark:text-blue-400 shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400'
+                                ? 'bg-white dark:bg-darkSurface text-blue-600 dark:text-blue-400 shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400'
                                 }`}
                         >
                             {t.modePlan}
@@ -36,8 +36,8 @@ const Header = ({ openSettings }: HeaderProps) => {
                         <button
                             onClick={() => setAppMode('shopping')}
                             className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${appMode === 'shopping'
-                                    ? 'bg-white dark:bg-darkSurface text-emerald-600 dark:text-emerald-400 shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400'
+                                ? 'bg-white dark:bg-darkSurface text-emerald-600 dark:text-emerald-400 shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400'
                                 }`}
                         >
                             {t.modeShop}
