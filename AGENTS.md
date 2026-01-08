@@ -25,6 +25,34 @@
 *   **Build**: Multi-stage Dockerfile.
 *   **Runtime**: `scratch` or `alpine` image. Final image size should be **< 20MB**.
 
+### ⚠️ Lesson Learned: PocketBase + Docker
+
+> **IMPORTANTE**: No intentar compilar PocketBase como librería Go en Docker con `go:embed`.
+
+**El problema:**
+- `go:embed` solo funciona con rutas relativas al archivo `.go`
+- En multi-stage builds, los paths se complican
+- La compilación de PocketBase + embed falla en CI/CD
+
+**La solución correcta:**
+```dockerfile
+# Descargar binario pre-compilado de PocketBase
+ARG POCKETBASE_VERSION=0.22.21
+ARG TARGETARCH
+RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${POCKETBASE_VERSION}/pocketbase_${POCKETBASE_VERSION}_linux_${TARGETARCH}.zip \
+    && unzip pocketbase_*.zip -d /app \
+    && rm pocketbase_*.zip
+
+# Copiar frontend a pb_public (PocketBase lo sirve automáticamente)
+COPY --from=frontend-builder /app/web/dist /app/pb_public
+```
+
+**Ventajas:**
+- ✅ Build más rápido (no compila Go)
+- ✅ Multi-arch automático (amd64/arm64)
+- ✅ Menos complejidad
+- ✅ Siempre funciona
+
 ---
 
 ## 📏 Coding Standards & "The Constitution"
