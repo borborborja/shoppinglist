@@ -1,6 +1,6 @@
 module shoplist
 
-go 1.23
+go 1.22
 
 require (
 	github.com/pocketbase/pocketbase v0.22.0

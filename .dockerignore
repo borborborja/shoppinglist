@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+web/node_modules
+
+# Build outputs
+web/dist
+pb_public
+
+# Data directories
+pb_data
+*.db
+*.db-shm
+*.db-wal
+
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Artifacts
+.gemini
+
+# Binaries
+pocketbase
+shoplist
+*.exe
+
+# Misc
+*.md
+!README.md
