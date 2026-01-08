@@ -37,27 +37,20 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
     // --- Sync Logic ---
     const connectSync = async (code: string) => {
         if (!navigator.onLine) return;
-        const normalizedCode = code.trim().toUpperCase();
-        if (!normalizedCode) return;
-
         setSyncState({ msg: 'Connecting...', msgType: 'info' });
         try {
-            const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${normalizedCode}"`);
+            const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${code}"`);
             const remoteData = record.data || { items: [], categories: undefined };
 
             // If user has local items, ask whether to merge or replace
             if (items.length > 0 && remoteData.items && remoteData.items.length > 0) {
-                setPendingSyncRecord({ id: record.id, code: normalizedCode, data: remoteData });
+                setPendingSyncRecord({ id: record.id, code, data: remoteData });
                 return;
             }
 
             // If no conflict, just sync (if remote has data, use it; otherwise keep local)
-            finishConnection(record.id, normalizedCode, remoteData.items.length > 0 ? remoteData : { items, categories });
-        } catch (e: any) {
-            console.error('Connection error:', e);
-            disconnectSync();
-            setSyncState({ msg: t.syncCodeNotFound || 'Code not found', msgType: 'error' });
-        }
+            finishConnection(record.id, code, remoteData.items.length > 0 ? remoteData : { items, categories });
+        } catch { disconnectSync(); setSyncState({ msg: 'Code not found', msgType: 'error' }); }
     };
 
     const handleSyncChoice = (choice: 'merge' | 'replace') => {
