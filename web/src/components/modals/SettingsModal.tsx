@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw } from 'lucide-react';
+import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles } from '../../data/constants';
 import { pb } from '../../lib/pocketbase';
@@ -16,7 +16,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
         notifyOnAdd, notifyOnCheck, setNotifyOnAdd, setNotifyOnCheck,
         categories, addCategoryItem, removeCategoryItem, addCategory, removeCategory,
         items, resetDefaults, importData,
-        sync, setSyncState, syncFromRemote
+        sync, setSyncState, syncFromRemote, addToSyncHistory
     } = useShopStore();
     const t = translations[lang];
 
@@ -73,6 +73,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
     const finishConnection = (recordId: string, code: string, data: { items: any[]; categories: any }) => {
         syncFromRemote({ items: data.items || [], categories: data.categories || undefined });
         setSyncState({ connected: true, code, recordId, msg: 'Connected', msgType: 'success' });
+        addToSyncHistory(code);
         localStorage.setItem('shopListSyncCode', code);
 
         // Push merged/synced data to remote
@@ -99,6 +100,21 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
         pb.collection('shopping_lists').unsubscribe('*');
         setSyncState({ connected: false, code: null, recordId: null, msg: '' });
         localStorage.removeItem('shopListSyncCode');
+    };
+
+    const manualSync = async () => {
+        if (!sync.connected || !sync.recordId) return;
+        setSyncState({ msg: 'Syncing...', msgType: 'info' });
+        try {
+            // Push local
+            await pb.collection('shopping_lists').update(sync.recordId, { data: { items, categories } });
+            // Pull remote
+            const record = await pb.collection('shopping_lists').getOne(sync.recordId);
+            if (record.data) syncFromRemote(record.data);
+            setSyncState({ msg: 'Synced just now', msgType: 'success' });
+        } catch {
+            setSyncState({ msg: 'Sync failed', msgType: 'error' });
+        }
     };
 
 
@@ -167,10 +183,24 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
                 {!sync.connected && !pendingSyncRecord ? (
                     <div>
                         <button onClick={createSharedList} className="w-full mb-3 bg-white dark:bg-darkSurface border border-blue-200 dark:border-blue-700 text-blue-600 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5"><Plus size={12} /> {t.createList}</button>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mb-3">
                             <input type="text" value={syncInputCode} onChange={(e) => setSyncInputCode(e.target.value)} placeholder="CODE..." className="flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-xs focus:outline-none dark:text-white uppercase tracking-widest font-mono text-center" />
                             <button onClick={() => connectSync(syncInputCode.toUpperCase())} className="bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs">{t.join}</button>
                         </div>
+
+                        {/* History */}
+                        {sync.syncHistory && sync.syncHistory.length > 0 && (
+                            <div className="space-y-1.5">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1 mb-1 flex items-center gap-1"><History size={10} /> {lang === 'ca' ? 'Historial recent' : 'Historial reciente'}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {sync.syncHistory.map(code => (
+                                        <button key={code} onClick={() => setSyncInputCode(code)} className="px-2 py-1 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition">
+                                            {code}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : sync.connected ? (
                     <div>
@@ -179,7 +209,10 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
                             <span className="font-mono font-bold text-blue-600 text-sm tracking-widest select-all">{sync.code}</span>
                             <button onClick={() => navigator.clipboard.writeText(sync.code!)} className="text-slate-400 hover:text-blue-500 p-1"><Copy size={12} /></button>
                         </div>
-                        <button onClick={disconnectSync} className="w-full text-xs font-bold text-red-500 hover:bg-red-50 py-2 rounded-lg flex items-center justify-center gap-1.5"><LogOut size={12} /> {t.disconnect}</button>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button onClick={manualSync} className="flex-1 text-xs font-bold text-blue-500 bg-white dark:bg-darkSurface border border-blue-100 dark:border-blue-800/30 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"><RotateCw size={12} /> {lang === 'ca' ? 'Sincronitzar' : 'Sincronizar'}</button>
+                            <button onClick={disconnectSync} className="flex-1 text-xs font-bold text-red-500 bg-white dark:bg-darkSurface border border-red-100 dark:border-red-800/20 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 transition"><LogOut size={12} /> {t.disconnect}</button>
+                        </div>
                     </div>
                 ) : null}
             </div>

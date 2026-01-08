@@ -43,7 +43,7 @@ const Footer = ({ installPrompt, onInstall }: FooterProps) => {
                         )}
                     </div>
                     <div className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">
-                        &copy; ShopList v2.3 (2026-01-08-1755)
+                        &copy; ShopList v2.4 (2026-01-08-1805)
                     </div>
                     <div className="flex justify-end">
                         <button onClick={toggleTheme} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-700">

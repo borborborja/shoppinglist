@@ -9,6 +9,7 @@ interface SyncState {
     recordId: string | null;
     msg: string;
     msgType: 'info' | 'success' | 'error';
+    syncHistory: string[];
 }
 
 interface ShopState {
@@ -56,6 +57,7 @@ interface ShopState {
     syncFromRemote: (data: { items: ShopItem[], categories?: Categories }) => void;
     resetDefaults: () => void;
     importData: (items: ShopItem[], categories: Categories) => void;
+    addToSyncHistory: (code: string) => void;
 
     // Auth Actions
     setAuth: (auth: Partial<AuthState>) => void;
@@ -74,7 +76,7 @@ export const useShopStore = create<ShopState>()(
             isAmoled: false,
             notifyOnAdd: true,
             notifyOnCheck: true,
-            sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info' },
+            sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info', syncHistory: [] },
             auth: { isLoggedIn: false, email: null, userId: null },
 
             setLang: (lang) => set({ lang }),
@@ -146,7 +148,11 @@ export const useShopStore = create<ShopState>()(
 
             // Auth Actions
             setAuth: (auth) => set((state) => ({ auth: { ...state.auth, ...auth } })),
-            logout: () => set({ auth: { isLoggedIn: false, email: null, userId: null } })
+            logout: () => set({ auth: { isLoggedIn: false, email: null, userId: null } }),
+            addToSyncHistory: (code: string) => set((state) => {
+                const history = [code, ...state.sync.syncHistory.filter(c => c !== code)].slice(0, 3);
+                return { sync: { ...state.sync, syncHistory: history } };
+            })
         }),
         {
             name: 'shoplist-storage',
@@ -166,7 +172,8 @@ export const useShopStore = create<ShopState>()(
                     code: state.sync.code,
                     recordId: state.sync.recordId,
                     msg: '',
-                    msgType: 'info' as const
+                    msgType: 'info' as const,
+                    syncHistory: state.sync.syncHistory
                 },
                 auth: state.auth
             })

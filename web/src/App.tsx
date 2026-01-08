@@ -24,24 +24,61 @@ function App() {
       Notification.requestPermission();
     }
 
-    // Proactive SW update check
+    // Proactive SW update check & Sync check
     const checkUpdates = async () => {
+      // Check for SW updates
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
           registration.update();
         }
       }
+
+      // Force a re-fetch of remote data if connected
+      const { sync } = useShopStore.getState();
+      if (sync.connected && sync.recordId) {
+        try {
+          const record = await pb.collection('shopping_lists').getOne(sync.recordId);
+          if (record.data) {
+            useShopStore.getState().syncFromRemote(record.data);
+          }
+        } catch (e) {
+          console.error('Failed proactive re-sync:', e);
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') checkUpdates();
     };
 
     window.addEventListener('focus', checkUpdates);
-    const updateInterval = setInterval(checkUpdates, 1000 * 60 * 60); // Every hour
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    const updateInterval = setInterval(checkUpdates, 1000 * 60 * 30); // Every 30 mins
 
     return () => {
       window.removeEventListener('focus', checkUpdates);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
       clearInterval(updateInterval);
     };
   }, []);
+
+  // Auto-reconnect if code exists but not connected
+  useEffect(() => {
+    const autoReconnect = async () => {
+      const { sync, setSyncState, syncFromRemote } = useShopStore.getState();
+      if (!sync.connected && sync.code) {
+        try {
+          const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${sync.code}"`);
+          setSyncState({ connected: true, recordId: record.id, msg: 'Reconnected', msgType: 'success' });
+          if (record.data) syncFromRemote(record.data);
+        } catch (e) {
+          console.error('Auto-reconnect failed:', e);
+        }
+      }
+    };
+    autoReconnect();
+  }, [sync.code, sync.connected]);
 
   // Sync local changes to remote when items/categories change
   useEffect(() => {
