@@ -4,15 +4,13 @@ import { useShopStore } from '../../store/shopStore';
 import { categoryStyles, translations } from '../../data/constants';
 import { getLocalizedItemName } from '../../utils/helpers';
 import type { LocalizedItem } from '../../types';
-import AddCategoryModal from '../modals/AddCategoryModal';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 const CategoryList = () => {
-    const { categories, addItem, lang, addCategoryItem, removeCategoryItem } = useShopStore();
+    const { categories, addItem, lang, addCategoryItem, removeCategoryItem, setAddCategoryOpen } = useShopStore();
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [isQuickEditMode, setIsQuickEditMode] = useState(false);
     const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [quickAddValue, setQuickAddValue] = useState('');
 
     const t = translations[lang];
@@ -73,7 +71,7 @@ const CategoryList = () => {
 
                 {/* Add Category Button */}
                 <button
-                    onClick={() => setShowAddCategoryModal(true)}
+                    onClick={() => setAddCategoryOpen(true)}
                     className="px-3 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-2 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:text-blue-500 hover:border-blue-500 bg-transparent"
                 >
                     <Plus size={16} />
@@ -161,10 +159,7 @@ const CategoryList = () => {
                     </div>
                 </div>
             )}
-            {/* Add Category Modal */}
-            {showAddCategoryModal && (
-                <AddCategoryModal onClose={() => setShowAddCategoryModal(false)} />
-            )}
+            {/* Add Category Modal moved to App.tsx */}
         </div>
     );
 };

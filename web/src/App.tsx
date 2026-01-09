@@ -7,6 +7,9 @@ import ShoppingView from './components/views/ShoppingView';
 import ListView from './components/views/ListView';
 import SettingsModal from './components/modals/SettingsModal';
 import AdminLayout from './components/admin/AdminLayout';
+import ProductModal from './components/modals/ProductModal';
+import CategoryPickerModal from './components/modals/CategoryPickerModal';
+import AddCategoryModal from './components/modals/AddCategoryModal';
 
 import { useGuestAuth } from './hooks/useGuestAuth';
 import { useListSync } from './hooks/useListSync';
@@ -16,7 +19,7 @@ function App() {
   const checkAdmin = () => window.location.hash.startsWith('#/admin') || window.location.pathname.startsWith('/admin');
 
   const [isAdmin, setIsAdmin] = useState(checkAdmin());
-  const { isDark, isAmoled, appMode } = useShopStore();
+  const { isDark, isAmoled, appMode, editingItem, setEditingItem, categoryPicker, closeCategoryPicker, confirmCategorySelection, isAddCategoryOpen, setAddCategoryOpen } = useShopStore();
   const [showSettings, setShowSettings] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -104,6 +107,22 @@ function App() {
               installPrompt={deferredPrompt}
               onInstall={() => setDeferredPrompt(null)}
             />}
+
+            {editingItem && (
+              <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
+            )}
+
+            {categoryPicker && (
+              <CategoryPickerModal
+                productName={categoryPicker.name}
+                onClose={closeCategoryPicker}
+                onConfirm={confirmCategorySelection}
+              />
+            )}
+
+            {isAddCategoryOpen && (
+              <AddCategoryModal onClose={() => setAddCategoryOpen(false)} />
+            )}
           </>
         )}
       </div>
