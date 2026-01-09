@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle, Database, Check, Sun, AlertCircle } from 'lucide-react';
+import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle, Database, Check, Sun, AlertCircle, Wifi } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, EMOJI_LIST } from '../../data/constants';
-import { pb } from '../../lib/pocketbase';
+import { pb, isNativePlatform, reinitializePocketBase } from '../../lib/pocketbase';
+import PocketBase from 'pocketbase';
 import { getLocalizedItemName } from '../../utils/helpers';
 import type { LocalizedItem, SettingsTab } from '../../types';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -40,6 +41,42 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     const [newCatKey, setNewCatKey] = useState('');
     const [newCatIcon, setNewCatIcon] = useState('📦');
 
+    // Server URL State (for native apps)
+    const { serverUrl, setServerUrl } = useShopStore();
+    const [tempServerUrl, setTempServerUrl] = useState(serverUrl || '');
+    const [connectionStatus, setConnectionStatus] = useState<{ msg: string; type: 'success' | 'error' | 'loading' | '' }>({ msg: '', type: '' });
+
+    // Test connection to remote server
+    const testConnection = async () => {
+        if (!tempServerUrl) {
+            setConnectionStatus({ msg: 'Introduce una URL', type: 'error' });
+            return;
+        }
+        setConnectionStatus({ msg: 'Probando conexión...', type: 'loading' });
+        try {
+            const testPb = new PocketBase(tempServerUrl);
+            await testPb.health.check();
+
+            // Check if remote access is enabled on the server
+            try {
+                const config = await testPb.collection('admin_config').getFullList();
+                const remoteConfig = config.find(c => c.key === 'enable_remote_access');
+                if (remoteConfig && remoteConfig.value !== 'true') {
+                    setConnectionStatus({ msg: 'Acceso remoto deshabilitado en el servidor', type: 'error' });
+                    return;
+                }
+            } catch {
+                // If we can't read config, assume it's ok (older server version)
+            }
+
+            // Success - save URL
+            setServerUrl(tempServerUrl);
+            reinitializePocketBase(tempServerUrl);
+            setConnectionStatus({ msg: '¡Conectado correctamente!', type: 'success' });
+        } catch (e: any) {
+            setConnectionStatus({ msg: `Error: ${e.message || 'No se puede conectar'}`, type: 'error' });
+        }
+    };
 
     // Debounce username check
     const checkUsername = async (name: string) => {
@@ -212,6 +249,44 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     // --- Tab Render ---
     const renderAccountTab = () => (
         <div className="space-y-6 animate-fade-in">
+            {/* Server URL Configuration (Native Apps Only) */}
+            {isNativePlatform() && (
+                <div className="bg-cyan-50 dark:bg-cyan-900/10 p-4 rounded-xl border border-cyan-100 dark:border-cyan-800/30">
+                    <h4 className="text-xs font-bold text-cyan-500 uppercase mb-3 tracking-wider flex items-center gap-2">
+                        <Wifi size={12} /> Servidor Remoto
+                    </h4>
+                    <div className="flex gap-2 mb-2">
+                        <input
+                            type="url"
+                            value={tempServerUrl}
+                            onChange={(e) => setTempServerUrl(e.target.value)}
+                            placeholder="https://tu-servidor.com"
+                            className="flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none dark:text-white font-mono"
+                        />
+                        <button
+                            onClick={testConnection}
+                            disabled={connectionStatus.type === 'loading'}
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                            {connectionStatus.type === 'loading' ? <RefreshCw size={12} className="animate-spin" /> : <Wifi size={12} />}
+                            Test
+                        </button>
+                    </div>
+                    {connectionStatus.msg && (
+                        <p className={`text-[10px] font-bold px-1 flex items-center gap-1 ${connectionStatus.type === 'success' ? 'text-green-500' :
+                                connectionStatus.type === 'error' ? 'text-red-500' : 'text-cyan-500'
+                            }`}>
+                            {connectionStatus.type === 'success' ? <Check size={10} /> :
+                                connectionStatus.type === 'error' ? <AlertCircle size={10} /> : null}
+                            {connectionStatus.msg}
+                        </p>
+                    )}
+                    <p className="text-[10px] text-slate-500 mt-2 px-1">
+                        Introduce la URL de tu servidor ShopList para sincronizar.
+                    </p>
+                </div>
+            )}
+
             {sync.connected && useShopStore.getState().enableUsernames && (
                 <div className={`bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 animate-slide-up`}>
                     <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider flex items-center gap-2">

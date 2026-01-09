@@ -18,6 +18,7 @@ const AdminSettings = () => {
     // Server Config state
     const [serverName, setServerNameState] = useState('');
     const [enableUsernames, setEnableUsernamesState] = useState(false);
+    const [enableRemoteAccess, setEnableRemoteAccessState] = useState(false);
     const [srvLoading, setSrvLoading] = useState(false);
     const [srvStatus, setSrvStatus] = useState({ msg: '', type: '' });
 
@@ -35,6 +36,9 @@ const AdminSettings = () => {
 
                 const userToggleRecord = config.find(c => c.key === 'enable_usernames');
                 if (userToggleRecord) setEnableUsernamesState(userToggleRecord.value === 'true');
+
+                const remoteRecord = config.find(c => c.key === 'enable_remote_access');
+                if (remoteRecord) setEnableRemoteAccessState(remoteRecord.value === 'true');
             } catch (e) {
                 console.error(e);
             }
@@ -58,6 +62,14 @@ const AdminSettings = () => {
                 await pb.collection('admin_config').update(userToggleRecord.id, { value: toggleVal });
             } else {
                 await pb.collection('admin_config').create({ key: 'enable_usernames', value: toggleVal });
+            }
+
+            const remoteRecord = config.find(c => c.key === 'enable_remote_access');
+            const remoteVal = enableRemoteAccess ? 'true' : 'false';
+            if (remoteRecord) {
+                await pb.collection('admin_config').update(remoteRecord.id, { value: remoteVal });
+            } else {
+                await pb.collection('admin_config').create({ key: 'enable_remote_access', value: remoteVal });
             }
 
             useShopStore.getState().setServerName(serverName);
@@ -405,6 +417,26 @@ const AdminSettings = () => {
                             </div>
                             <p className="text-[10px] text-amber-700 dark:text-amber-300">
                                 ⚠️ Función experimental. Permite que los usuarios elijan un nombre para mostrar quién está conectado a la lista. Puede ser inestable.
+                            </p>
+                        </div>
+
+                        {/* Remote Access Toggle */}
+                        <div className="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <SettingsIcon size={16} className="text-cyan-600 dark:text-cyan-400" />
+                                    <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">Acceso Remoto (Apps)</h4>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setEnableRemoteAccessState(!enableRemoteAccess)}
+                                    className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${enableRemoteAccess ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                >
+                                    <div className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${enableRemoteAccess ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-cyan-700 dark:text-cyan-300">
+                                📱 Permite que apps móviles (Capacitor) se conecten a este servidor. Desactivado por defecto por seguridad.
                             </p>
                         </div>
 

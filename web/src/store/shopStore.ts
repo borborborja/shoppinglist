@@ -39,11 +39,13 @@ interface ShopState {
     sync: SyncState;
     auth: AuthState;
     enableUsernames: boolean;
+    serverUrl: string; // For native apps to configure remote server
 
     // Actions
     setLang: (lang: Lang) => void;
     setServerName: (name: string) => void;
     setEnableUsernames: (val: boolean) => void;
+    setServerUrl: (url: string) => void;
     setAppMode: (mode: AppMode) => void;
     setViewMode: (mode: ViewMode) => void;
     setTheme: (theme: 'light' | 'dark' | 'amoled') => void;
@@ -100,12 +102,14 @@ export const useShopStore = create<ShopState>()(
             sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info', syncHistory: [], lastSync: null, syncVersion: 0, lastLocalInteraction: 0 },
             auth: { isLoggedIn: false, email: null, userId: null, username: null },
             enableUsernames: false,
+            serverUrl: '',
             sortOrder: 'category',
             showCompletedInline: false,
 
             setLang: (lang) => set({ lang }),
             setServerName: (serverName) => set({ serverName }),
             setEnableUsernames: (enableUsernames) => set({ enableUsernames }),
+            setServerUrl: (serverUrl) => set({ serverUrl }),
             setAppMode: (appMode) => set((state) => {
                 if (appMode === 'planning' && state.viewMode === 'grid') {
                     return { appMode, viewMode: 'compact' };
