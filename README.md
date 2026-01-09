@@ -12,17 +12,24 @@ A modern, self-hosted shopping list application with real-time synchronization.
 
 ## 🚀 Quick Start
 
-### Using Docker (Recommended)
+### Using Docker Hub (Recommended)
+
+The easiest way to run ShopList is using the pre-built image from Docker Hub.
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/llista_compra.git
-cd llista_compra
-
-# Copy environment file and configure (optional)
-cp .env.example .env
+# Download the hub compose file
+curl -O https://raw.githubusercontent.com/borborborja/llista_compra/main/docker-compose.hub.yml
 
 # Start the application
+docker-compose -f docker-compose.hub.yml up -d
+```
+
+### Using Docker (Build from source)
+
+If you have cloned the repository and want to build the images locally:
+
+```bash
+# Start the application (local build)
 docker-compose up -d
 ```
 

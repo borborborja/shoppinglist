@@ -101,51 +101,59 @@ function App() {
     const handleSyncParam = async () => {
       const { sync, setSyncState, syncFromRemote } = useShopStore.getState();
 
-      // 1. Check for URL parameter
       const params = new URLSearchParams(window.location.search);
-      const urlCode = (params.get('c') || params.get('code'))?.toUpperCase();
+      const urlCode = (params.get('c') || params.get('code'))?.trim().toUpperCase();
 
-      if (urlCode && urlCode !== sync.code) {
-        if (!navigator.onLine) return;
-
-        const { items, lang } = useShopStore.getState();
-        const hasData = items.length > 0 || sync.connected;
-
-        if (hasData) {
-          const msg = lang === 'ca'
-            ? `Tens una llista activa. Vols descartar-la i connectar-te a la llista compartida (${urlCode})?`
-            : `Tienes una lista activa. ¿Quieres descartarla y conectarte a la lista compartida (${urlCode})?`;
-
-          if (!confirm(msg)) {
-            // User cancelled - clear URL param and stop
-            const newUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, newUrl);
-            return;
-          }
+      // Case A: URL has a sync code
+      if (urlCode) {
+        // If already connected correctly, just clear URL and stop
+        if (sync.connected && sync.code === urlCode) {
+          const newUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+          return;
         }
 
-        setSyncState({ msg: 'Connecting from link...', msgType: 'info' });
+        if (!navigator.onLine) return;
+
         try {
+          // 1. Validate code FIRST (fetch record)
           const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${urlCode}"`);
           const remoteData = record.data || { items: [], categories: undefined };
 
-          // Auto-sync from URL (prioritizing remote if conflict for simplicity in auto-join)
+          // 2. Check if we need to confirm
+          const { items, lang } = useShopStore.getState();
+          const hasSignificantData = items.length > 0 || (sync.connected && sync.code !== urlCode);
+
+          if (hasSignificantData) {
+            const msg = lang === 'ca'
+              ? `Vols connectar-te a la llista compartida "${urlCode}"? Es descartarà la teva llista actual.`
+              : `¿Quieres conectarte a la lista compartida "${urlCode}"? Se descartará tu lista actual.`;
+
+            if (!confirm(msg)) {
+              const newUrl = window.location.origin + window.location.pathname;
+              window.history.replaceState({}, document.title, newUrl);
+              return;
+            }
+          }
+
+          // 3. Perform connection
+          setSyncState({ msg: 'Connecting...', msgType: 'info' });
           syncFromRemote({ items: remoteData.items || [], categories: remoteData.categories || undefined });
-          setSyncState({ connected: true, code: urlCode, recordId: record.id, msg: 'Connected from link', msgType: 'success' });
+          setSyncState({ connected: true, code: urlCode, recordId: record.id, msg: 'Connected!', msgType: 'success' });
           useShopStore.getState().addToSyncHistory(urlCode);
           localStorage.setItem('shopListSyncCode', urlCode);
-
-          // Clear URL param without reloading
-          const newUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, newUrl);
         } catch (e) {
           console.error('URL Sync failed:', e);
-          setSyncState({ msg: 'Invalid link code', msgType: 'error' });
+          setSyncState({ msg: 'Invalid or missing code', msgType: 'error' });
         }
+
+        // Always clear URL
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
         return;
       }
 
-      // 2. Standard auto-reconnect
+      // Case B: No URL code, handle standard auto-reconnect
       if (!sync.connected && sync.code) {
         try {
           const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${sync.code}"`);

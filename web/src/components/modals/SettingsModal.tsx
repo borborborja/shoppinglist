@@ -286,7 +286,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
             {/* Existing Catalog Management */}
             <div>
                 <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">{t.manageCatalog}</h4>
-                <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
+                <div className="flex flex-wrap gap-2 mb-4 pb-1">
                     {Object.entries(categories).map(([key, cat]) => {
                         const isActive = settingsActiveCat === key;
                         const style = categoryStyles[key] || categoryStyles['other'];
