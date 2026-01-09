@@ -140,14 +140,19 @@ const AdminSettings = () => {
             // 1. Verify current password
             const records = await pb.collection('admin_config').getFullList({ filter: 'key="password"' });
             const pwdRecord = records[0];
+            const currentDbPwd = pwdRecord?.value || 'admin123';
 
-            if (!pwdRecord || pwdRecord.value !== pwdData.current) {
+            if (pwdData.current !== currentDbPwd) {
                 setPwdStatus({ msg: 'Contraseña actual incorrecta', type: 'error' });
                 return;
             }
 
-            // 2. Update to new password
-            await pb.collection('admin_config').update(pwdRecord.id, { value: pwdData.new });
+            // 2. Update or Create password record
+            if (pwdRecord) {
+                await pb.collection('admin_config').update(pwdRecord.id, { value: pwdData.new });
+            } else {
+                await pb.collection('admin_config').create({ key: 'password', value: pwdData.new });
+            }
 
             setPwdStatus({ msg: '¡Contraseña actualizada correctamente!', type: 'success' });
             setPwdData({ current: '', new: '', confirm: '' });
