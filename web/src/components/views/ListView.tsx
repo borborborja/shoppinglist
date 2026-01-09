@@ -220,7 +220,7 @@ const ListView = () => {
     };
 
     return (
-        <div className="relative z-0">
+        <div className="relative">
             {/* List Header */}
             <div className="flex justify-between items-end mb-4 px-1">
                 <div className="flex items-center gap-2">
