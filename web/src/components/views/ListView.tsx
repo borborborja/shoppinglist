@@ -74,65 +74,114 @@ const ListView = () => {
         if (navigator.vibrate) navigator.vibrate(20);
     };
 
-    // Sub-components for cleaner rendering
-    const ItemCard = ({ item, style }: { item: ShopItem, style: any }) => (
-        <div
-            onClick={() => {
-                if (appMode === 'shopping') {
-                    toggleCheck(item.id);
-                } else {
-                    setEditingItem(item);
-                }
-                if (navigator.vibrate) navigator.vibrate(20);
-            }}
-            className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] ${getItemClass()} ${item.checked
-                ? 'bg-slate-50 dark:bg-slate-800/40 border-transparent grayscale'
-                : 'bg-white dark:bg-darkSurface border-slate-100 dark:border-slate-700/50 hover:shadow-md'}`}
-        >
-            <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.checked ? 'bg-slate-300 dark:bg-slate-600' : style.bgSolid}`}></div>
-            <div className="flex-shrink-0 ml-2 mr-3" onClick={(e) => e.stopPropagation()}>
-                <button
-                    onClick={() => { toggleCheck(item.id); if (navigator.vibrate) navigator.vibrate(20); }}
-                    className={`rounded-full border-2 flex items-center justify-center transition-all ${item.checked
-                        ? 'border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white'
-                        : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 bg-transparent text-transparent'
-                        } ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}
-                >
-                    <Check size={viewMode === 'compact' ? 10 : 14} className={item.checked ? 'opacity-100' : 'opacity-0'} />
-                </button>
-            </div>
-            <div className="flex-grow overflow-hidden py-1">
-                <p className={`font-bold truncate transition-all ${item.checked
-                    ? 'line-through text-slate-400'
-                    : 'text-slate-700 dark:text-slate-200'} ${viewMode === 'compact' ? 'text-xs' : (viewMode === 'grid' ? 'text-[11px]' : 'text-sm')}`}>
-                    {item.name}
-                </p>
-                {item.note && viewMode !== 'compact' && (
-                    <p className="text-[10px] text-slate-400 truncate mt-0.5 flex items-center gap-1">
-                        <StickyNote size={10} /> {item.note}
-                    </p>
-                )}
-            </div>
-            {appMode === 'planning' && (
-                <div className="flex items-center pr-1 h-full">
-                    {!item.checked && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
-                            className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition mr-1"
-                        >
-                            <Pen size={14} />
-                        </button>
-                    )}
+    // Sub-component moved outside to use hooks correctly
+    const ItemCard = ({
+        item,
+        style,
+        viewMode,
+        appMode,
+        toggleCheck,
+        setEditingItem,
+        handleDelete,
+        getItemClass
+    }: {
+        item: ShopItem,
+        style: any,
+        viewMode: string,
+        appMode: string,
+        toggleCheck: (id: number) => void,
+        setEditingItem: (item: ShopItem) => void,
+        handleDelete: (id: number, e: React.MouseEvent) => void,
+        getItemClass: () => string
+    }) => {
+        const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+        const isLongPressActive = useRef(false);
+
+        const startPress = () => {
+            isLongPressActive.current = false;
+            timerRef.current = setTimeout(() => {
+                isLongPressActive.current = true;
+                setEditingItem(item);
+                if (navigator.vibrate) navigator.vibrate(50);
+            }, 700); // 700ms feels snappier than 1s for mobile
+        };
+
+        const endPress = () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+
+        const handleOnClick = () => {
+            if (isLongPressActive.current) {
+                isLongPressActive.current = false;
+                return;
+            }
+            toggleCheck(item.id);
+            if (navigator.vibrate) navigator.vibrate(20);
+        };
+
+        return (
+            <div
+                onMouseDown={startPress}
+                onMouseUp={endPress}
+                onMouseLeave={endPress}
+                onTouchStart={() => {
+                    // Prevent context menu on long press devices usually
+                    startPress();
+                }}
+                onTouchEnd={endPress}
+                onClick={handleOnClick}
+                className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] select-none ${getItemClass()} ${item.checked
+                    ? 'bg-slate-50 dark:bg-slate-800/40 border-transparent grayscale'
+                    : 'bg-white dark:bg-darkSurface border-slate-100 dark:border-slate-700/50 hover:shadow-md'}`}
+            >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.checked ? 'bg-slate-300 dark:bg-slate-600' : style.bgSolid}`}></div>
+                <div className="flex-shrink-0 ml-2 mr-3" onClick={(e) => e.stopPropagation()}>
                     <button
-                        onClick={(e) => handleDelete(item.id, e)}
-                        className={`w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition ${item.checked ? '' : 'mr-1'}`}
+                        onClick={() => { toggleCheck(item.id); if (navigator.vibrate) navigator.vibrate(20); }}
+                        className={`rounded-full border-2 flex items-center justify-center transition-all ${item.checked
+                            ? 'border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white'
+                            : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 bg-transparent text-transparent'
+                            } ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}
                     >
-                        <Trash2 size={16} />
+                        <Check size={viewMode === 'compact' ? 10 : 14} className={item.checked ? 'opacity-100' : 'opacity-0'} />
                     </button>
                 </div>
-            )}
-        </div>
-    );
+                <div className="flex-grow overflow-hidden py-1">
+                    <p className={`font-bold truncate transition-all ${item.checked
+                        ? 'line-through text-slate-400'
+                        : 'text-slate-700 dark:text-slate-200'} ${viewMode === 'compact' ? 'text-xs' : (viewMode === 'grid' ? 'text-[11px]' : 'text-sm')}`}>
+                        {item.name}
+                    </p>
+                    {item.note && viewMode !== 'compact' && (
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5 flex items-center gap-1">
+                            <StickyNote size={10} /> {item.note}
+                        </p>
+                    )}
+                </div>
+                {appMode === 'planning' && (
+                    <div className="flex items-center pr-1 h-full">
+                        {!item.checked && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
+                                className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition mr-1"
+                            >
+                                <Pen size={14} />
+                            </button>
+                        )}
+                        <button
+                            onClick={(e) => handleDelete(item.id, e)}
+                            className={`w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition ${item.checked ? '' : 'mr-1'}`}
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const CompletedSection = () => {
         if (showCompletedInline || completedItems.length === 0) return null;
@@ -153,7 +202,17 @@ const ListView = () => {
                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
                     {completedItems.map(item => {
                         const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
-                        return <ItemCard key={item.id} item={item} style={style} />;
+                        return <ItemCard
+                            key={item.id}
+                            item={item}
+                            style={style}
+                            viewMode={viewMode}
+                            appMode={appMode}
+                            toggleCheck={toggleCheck}
+                            setEditingItem={setEditingItem}
+                            handleDelete={handleDelete}
+                            getItemClass={getItemClass}
+                        />;
                     })}
                 </div>
             </div>
@@ -268,7 +327,19 @@ const ListView = () => {
                                     <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
                                 </div>
                                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                                    {groupItems.map(item => <ItemCard key={item.id} item={item} style={style} />)}
+                                    {groupItems.map(item => (
+                                        <ItemCard
+                                            key={item.id}
+                                            item={item}
+                                            style={style}
+                                            viewMode={viewMode}
+                                            appMode={appMode}
+                                            toggleCheck={toggleCheck}
+                                            setEditingItem={setEditingItem}
+                                            handleDelete={handleDelete}
+                                            getItemClass={getItemClass}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         );
@@ -279,7 +350,17 @@ const ListView = () => {
                             <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
                                 {itemsSorted.map(item => {
                                     const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
-                                    return <ItemCard key={item.id} item={item} style={style} />;
+                                    return <ItemCard
+                                        key={item.id}
+                                        item={item}
+                                        style={style}
+                                        viewMode={viewMode}
+                                        appMode={appMode}
+                                        toggleCheck={toggleCheck}
+                                        setEditingItem={setEditingItem}
+                                        handleDelete={handleDelete}
+                                        getItemClass={getItemClass}
+                                    />;
                                 })}
                             </div>
                         </div>
