@@ -123,7 +123,7 @@ export function useListSync() {
                     // If the user interacted locally in the last 500ms, ignore this remote update.
                     // This prevents the "revert" flicker when the server echoes back an old state
                     // right after we made a change but before our change propagatedfully.
-                    const { lastLocalInteraction } = useShopStore.getState();
+                    const { lastLocalInteraction } = useShopStore.getState().sync;
                     if (Date.now() - lastLocalInteraction < 500) {
                         return; // Ignore this update, our local state is newer
                     }
