@@ -34,9 +34,6 @@ interface ShopState {
     activeUsers: PresenceUser[];
     sortOrder: 'category' | 'alpha';
     showCompletedInline: boolean;
-    editingItem: ShopItem | null;
-    categoryPicker: { name: string } | null;
-    isAddCategoryOpen: boolean;
 
     // Sync & Auth
     sync: SyncState;
@@ -56,11 +53,6 @@ interface ShopState {
     setNotifyOnCheck: (val: boolean) => void;
     setSortOrder: (order: 'category' | 'alpha') => void;
     setShowCompletedInline: (val: boolean) => void;
-    setEditingItem: (item: ShopItem | null) => void;
-    openCategoryPicker: (name: string) => void;
-    closeCategoryPicker: () => void;
-    setAddCategoryOpen: (val: boolean) => void;
-    confirmCategorySelection: (category: string, addToCatalog: boolean) => void;
 
     addItem: (name: string, cat?: string) => void;
     toggleCheck: (id: number) => void;
@@ -110,9 +102,6 @@ export const useShopStore = create<ShopState>()(
             enableUsernames: false,
             sortOrder: 'category',
             showCompletedInline: false,
-            editingItem: null,
-            categoryPicker: null,
-            isAddCategoryOpen: false,
 
             setLang: (lang) => set({ lang }),
             setServerName: (serverName) => set({ serverName }),
@@ -149,34 +138,6 @@ export const useShopStore = create<ShopState>()(
             setNotifyOnCheck: (notifyOnCheck) => set({ notifyOnCheck }),
             setSortOrder: (sortOrder) => set({ sortOrder }),
             setShowCompletedInline: (showCompletedInline) => set({ showCompletedInline }),
-
-            setEditingItem: (editingItem) => set({ editingItem }),
-            openCategoryPicker: (name) => set({ categoryPicker: { name } }),
-            closeCategoryPicker: () => set({ categoryPicker: null }),
-            setAddCategoryOpen: (isAddCategoryOpen) => set({ isAddCategoryOpen }),
-
-            confirmCategorySelection: (category, addToCatalog) => set((state) => {
-                if (!state.categoryPicker) return {};
-                const name = state.categoryPicker.name;
-
-                // Add to list
-                const newItem = { id: Date.now(), name, checked: false, note: '', category };
-
-                // Add to catalog if requested
-                if (addToCatalog) {
-                    const localized: LocalizedItem = { es: name, ca: name, en: name, [state.lang]: name };
-                    const cats = { ...state.categories };
-                    if (cats[category]) {
-                        cats[category].items = [...cats[category].items, localized];
-                    }
-                }
-
-                return {
-                    items: [newItem, ...state.items],
-                    categoryPicker: null,
-                    sync: { ...state.sync, lastLocalInteraction: Date.now() }
-                };
-            }),
 
             addItem: (name, cat = 'other') => set((state) => ({
                 items: [{ id: Date.now(), name, checked: false, note: '', category: cat }, ...state.items],
@@ -313,9 +274,6 @@ export const useShopStore = create<ShopState>()(
                 enableUsernames: false,
                 sortOrder: state.sortOrder,
                 showCompletedInline: state.showCompletedInline,
-                editingItem: null,
-                categoryPicker: null,
-                isAddCategoryOpen: false,
                 // Keep code/recordId for reconnection, but reset connection status
                 sync: {
                     connected: false,

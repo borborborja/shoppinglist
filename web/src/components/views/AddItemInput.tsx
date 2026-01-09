@@ -4,6 +4,7 @@ import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles } from '../../data/constants';
 import { getLocalizedItemName } from '../../utils/helpers';
 import type { LocalizedItem } from '../../types';
+import CategoryPickerModal from '../modals/CategoryPickerModal';
 
 interface SuggestionItem {
     name: string;
@@ -16,10 +17,11 @@ const AddItemInput = () => {
     const [val, setVal] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [showCategoryPicker, setShowCategoryPicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const { addItem, categories, lang, openCategoryPicker } = useShopStore();
+    const { addItem, addCategoryItem, categories, lang } = useShopStore();
     const t = translations[lang];
 
     // Build flat list of all catalog items with their categories
@@ -103,10 +105,22 @@ const AddItemInput = () => {
 
         // Otherwise, show category picker for custom product
         setShowSuggestions(false);
-        openCategoryPicker(val.trim());
+        setShowCategoryPicker(true);
     };
 
-    // Category Confirm moved to store
+    const handleCategoryConfirm = (category: string, addToCatalog: boolean) => {
+        const name = val.trim();
+        addItem(name, category);
+
+        if (addToCatalog) {
+            const newItem: LocalizedItem = { es: name, ca: name, en: name, [lang]: name };
+            addCategoryItem(category, newItem);
+        }
+
+        setVal('');
+        setShowCategoryPicker(false);
+        if (navigator.vibrate) navigator.vibrate(20);
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (!showSuggestions || suggestions.length === 0) {
@@ -209,6 +223,14 @@ const AddItemInput = () => {
                 )}
             </div>
 
+            {/* Category Picker Modal */}
+            {showCategoryPicker && (
+                <CategoryPickerModal
+                    productName={val.trim()}
+                    onClose={() => setShowCategoryPicker(false)}
+                    onConfirm={handleCategoryConfirm}
+                />
+            )}
         </>
     );
 };

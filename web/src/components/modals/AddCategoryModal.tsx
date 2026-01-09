@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, EMOJI_LIST } from '../../data/constants';
@@ -28,8 +29,8 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
 
     const emojis = EMOJI_LIST;
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
             <div className="relative w-full max-w-sm bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 animate-pop z-50">
                 <div className="flex justify-between items-center mb-6">
@@ -90,7 +91,8 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

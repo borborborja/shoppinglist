@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check, Plus } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles } from '../../data/constants';
@@ -25,7 +26,7 @@ const CategoryPickerModal = ({ productName, onClose, onConfirm }: CategoryPicker
         }
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-safe">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
             <div className="relative w-full max-w-sm bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh] animate-pop ring-1 ring-white/10 z-50 overflow-hidden">
@@ -115,7 +116,8 @@ const CategoryPickerModal = ({ productName, onClose, onConfirm }: CategoryPicker
             {showAddCategoryModal && (
                 <AddCategoryModal onClose={() => setShowAddCategoryModal(false)} />
             )}
-        </div>
+        </div>,
+        document.body
     );
 };
 

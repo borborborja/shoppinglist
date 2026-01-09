@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle, Database, Check, Sun, AlertCircle } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, EMOJI_LIST } from '../../data/constants';
@@ -700,7 +701,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         </div>
     );
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
             <div className="relative w-11/12 max-w-md bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 animate-pop overflow-y-auto max-h-[90vh] ring-1 ring-white/10">
@@ -732,7 +733,8 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                 {activeTab === 'other' && renderOtherTab()}
                 {activeTab === 'about' && renderAboutTab()}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

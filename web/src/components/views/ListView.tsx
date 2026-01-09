@@ -3,10 +3,12 @@ import { Check, Trash2, List, LayoutGrid, AlignJustify, StickyNote, ShoppingBask
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, defaultCategories } from '../../data/constants';
 import type { ShopItem } from '../../types';
+import ProductModal from '../modals/ProductModal';
 
 const ListView = () => {
-    const { items, categories, lang, viewMode, appMode, setViewMode, toggleCheck, deleteItem, clearCompleted, sync, activeUsers, sortOrder, setSortOrder, showCompletedInline, setShowCompletedInline, setEditingItem } = useShopStore();
+    const { items, categories, lang, viewMode, appMode, setViewMode, toggleCheck, deleteItem, clearCompleted, sync, activeUsers, sortOrder, setSortOrder, showCompletedInline, setShowCompletedInline } = useShopStore();
     const t = translations[lang];
+    const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
     const [showOptions, setShowOptions] = useState(false);
     const optionsRef = useRef<HTMLDivElement>(null);
 
@@ -383,6 +385,10 @@ const ListView = () => {
                 </div>
             )}
 
+            {/* Editing Product Modal */}
+            {editingItem && (
+                <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
+            )}
         </div>
     );
 };

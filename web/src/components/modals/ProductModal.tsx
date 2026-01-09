@@ -3,6 +3,7 @@ import type { ShopItem } from '../../types';
 import { translations, categoryStyles } from '../../data/constants';
 import { useShopStore } from '../../store/shopStore';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface ProductModalProps {
@@ -25,7 +26,7 @@ const ProductModal = ({ item: initialItem, onClose }: ProductModalProps) => {
         onClose();
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center sm:items-center items-end">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
             <div className="relative w-full sm:w-[28rem] bg-white dark:bg-darkSurface rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh] animate-slide-up m-0 sm:m-4 ring-1 ring-white/10 z-50">
@@ -54,7 +55,8 @@ const ProductModal = ({ item: initialItem, onClose }: ProductModalProps) => {
                     {t.saveNote}
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
