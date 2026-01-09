@@ -23,7 +23,7 @@ func main() {
 	// Try "web/dist" first as it is the standard structure
 	distFS, err := fs.Sub(frontendDist, "web/dist")
 	if err != nil {
-		// Fallback to "dist" 
+		// Fallback to "dist"
 		distFS, _ = fs.Sub(frontendDist, "dist")
 	}
 

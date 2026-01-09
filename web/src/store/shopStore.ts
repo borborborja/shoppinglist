@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ShopItem, Categories, Lang, AppMode, ViewMode, LocalizedItem, AuthState } from '../types';
+import type { ShopItem, Categories, Lang, AppMode, ViewMode, LocalizedItem, AuthState, PresenceUser } from '../types';
 import { defaultCategories } from '../data/constants';
 import { pb } from '../lib/pocketbase';
 
@@ -24,25 +24,34 @@ interface ShopState {
     lang: Lang;
     appMode: AppMode;
     viewMode: ViewMode;
+    theme: 'light' | 'dark' | 'amoled';
     isDark: boolean;
     isAmoled: boolean;
     notifyOnAdd: boolean;
     notifyOnCheck: boolean;
     serverName: string;
+    activeUsers: PresenceUser[];
+    sortOrder: 'category' | 'alpha';
+    showCompletedInline: boolean;
 
     // Sync & Auth
     sync: SyncState;
     auth: AuthState;
+    enableUsernames: boolean;
 
     // Actions
     setLang: (lang: Lang) => void;
     setServerName: (name: string) => void;
+    setEnableUsernames: (val: boolean) => void;
     setAppMode: (mode: AppMode) => void;
     setViewMode: (mode: ViewMode) => void;
+    setTheme: (theme: 'light' | 'dark' | 'amoled') => void;
     toggleTheme: () => void;
     toggleAmoled: () => void;
     setNotifyOnAdd: (val: boolean) => void;
     setNotifyOnCheck: (val: boolean) => void;
+    setSortOrder: (order: 'category' | 'alpha') => void;
+    setShowCompletedInline: (val: boolean) => void;
 
     addItem: (name: string, cat?: string) => void;
     toggleCheck: (id: number) => void;
@@ -67,6 +76,8 @@ interface ShopState {
 
     // Auth Actions
     setAuth: (auth: Partial<AuthState>) => void;
+    setUsername: (name: string) => void;
+    setActiveUsers: (users: PresenceUser[]) => void;
     logout: () => void;
 }
 
@@ -78,28 +89,54 @@ export const useShopStore = create<ShopState>()(
             lang: 'ca',
             appMode: 'planning',
             viewMode: 'list',
+            theme: 'light',
             isDark: false,
             isAmoled: false,
             notifyOnAdd: true,
             notifyOnCheck: true,
             serverName: 'ShopList',
+            activeUsers: [],
             sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info', syncHistory: [], lastSync: null, syncVersion: 0 },
-            auth: { isLoggedIn: false, email: null, userId: null },
+            auth: { isLoggedIn: false, email: null, userId: null, username: null },
+            enableUsernames: true,
+            sortOrder: 'category',
+            showCompletedInline: false,
 
             setLang: (lang) => set({ lang }),
             setServerName: (serverName) => set({ serverName }),
-            setAppMode: (appMode) => set({ appMode }),
+            setEnableUsernames: (enableUsernames) => set({ enableUsernames }),
+            setAppMode: (appMode) => set((state) => {
+                if (appMode === 'planning' && state.viewMode === 'grid') {
+                    return { appMode, viewMode: 'compact' };
+                }
+                return { appMode };
+            }),
             setViewMode: (viewMode) => set({ viewMode }),
+            setTheme: (theme) => set({
+                theme,
+                isDark: theme !== 'light',
+                isAmoled: theme === 'amoled'
+            }),
             toggleTheme: () => set((state) => {
-                const newDark = !state.isDark;
-                return { isDark: newDark, isAmoled: newDark ? state.isAmoled : false };
+                const newTheme = state.theme === 'light' ? 'dark' : 'light';
+                return {
+                    theme: newTheme,
+                    isDark: newTheme !== 'light',
+                    isAmoled: false
+                };
             }),
             toggleAmoled: () => set((state) => {
-                const newAmoled = !state.isAmoled;
-                return { isAmoled: newAmoled, isDark: newAmoled ? true : state.isDark };
+                const newTheme = state.theme === 'amoled' ? 'dark' : 'amoled';
+                return {
+                    theme: newTheme,
+                    isDark: true,
+                    isAmoled: newTheme === 'amoled'
+                };
             }),
             setNotifyOnAdd: (notifyOnAdd) => set({ notifyOnAdd }),
             setNotifyOnCheck: (notifyOnCheck) => set({ notifyOnCheck }),
+            setSortOrder: (sortOrder) => set({ sortOrder }),
+            setShowCompletedInline: (showCompletedInline) => set({ showCompletedInline }),
 
             addItem: (name, cat = 'other') => set((state) => ({
                 items: [{ id: Date.now(), name, checked: false, note: '', category: cat }, ...state.items]
@@ -156,7 +193,9 @@ export const useShopStore = create<ShopState>()(
 
             // Auth Actions
             setAuth: (auth) => set((state) => ({ auth: { ...state.auth, ...auth } })),
-            logout: () => set({ auth: { isLoggedIn: false, email: null, userId: null } }),
+            setUsername: (username) => set((state) => ({ auth: { ...state.auth, username } })),
+            setActiveUsers: (activeUsers) => set({ activeUsers }),
+            logout: () => set({ auth: { isLoggedIn: false, email: null, userId: null, username: null } }),
             addToSyncHistory: (code: string) => set((state) => {
                 const history = [code, ...state.sync.syncHistory.filter(c => c !== code)].slice(0, 3);
                 return { sync: { ...state.sync, syncHistory: history } };
@@ -196,12 +235,16 @@ export const useShopStore = create<ShopState>()(
 
                     // Load server config
                     try {
-                        const config = await pb.collection('admin_config').getFullList({ filter: 'key="server_name"' });
-                        if (config[0]) {
-                            set({ serverName: config[0].value });
-                        }
+                        const config = await pb.collection('admin_config').getFullList();
+
+                        const srvNameRecord = config.find(c => c.key === 'server_name');
+                        if (srvNameRecord) set({ serverName: srvNameRecord.value });
+
+                        const enableUsernamesRecord = config.find(c => c.key === 'enable_usernames');
+                        if (enableUsernamesRecord) set({ enableUsernames: enableUsernamesRecord.value === 'true' });
+
                     } catch (e) {
-                        console.error("Failed to load server name", e);
+                        console.error("Failed to load server config", e);
                     }
                 } catch (e) {
                     console.error("Failed to load catalog", e);
@@ -216,11 +259,15 @@ export const useShopStore = create<ShopState>()(
                 lang: state.lang,
                 appMode: state.appMode,
                 viewMode: state.viewMode,
+                theme: state.theme,
                 isDark: state.isDark,
                 isAmoled: state.isAmoled,
                 notifyOnAdd: state.notifyOnAdd,
                 notifyOnCheck: state.notifyOnCheck,
                 serverName: state.serverName,
+                enableUsernames: state.enableUsernames,
+                sortOrder: state.sortOrder,
+                showCompletedInline: state.showCompletedInline,
                 // Keep code/recordId for reconnection, but reset connection status
                 sync: {
                     connected: false,

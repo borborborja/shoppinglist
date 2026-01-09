@@ -1,9 +1,9 @@
 import type { Categories } from "../types";
 
 export const translations = {
-    es: { appTitle: 'ShopList', placeholder: 'Añadir producto...', quickAdd: 'Añadir Rápidamente', myList: 'Mi Lista', clearComp: 'Limpiar', empty: 'Tu lista está vacía', settings: 'Ajustes', data: 'Backup', export: 'Exportar', import: 'Importar', notes: 'Notas', saveNote: 'Guardar', add: 'Añadir', cats: { fruit: 'Fruta', veg: 'Verdura', meat: 'Carne/Pescado', dairy: 'Lácteos', pantry: 'Despensa/Pan', cleaning: 'Higiene/Limpieza', home: 'Hogar', snacks: 'Snacks/Dulces', frozen: 'Congelados', processed: 'Procesados', drinks: 'Bebidas', other: 'General/Otros' }, resetBtn: 'Restaurar de Fábrica', completed: 'Completados', progress: 'Progreso', cancel: 'Cancelar', sync: 'Sincronización', createList: 'Crear Lista', join: 'Unirse', disconnect: 'Desconectar', modePlan: 'Planificador', modeShop: 'Comprar', manageCatalog: 'Gestión de Productos', tabAccount: 'Cuenta', tabProducts: 'Productos', tabOther: 'Otros', email: 'Email', password: 'Contraseña', passwordConfirm: 'Confirmar Contraseña', login: 'Entrar', register: 'Registrar', loggedAs: 'Conectado como', newCategory: 'Nueva Categoría', categoryName: 'Nombre', categoryIcon: 'Emoji', deleteCategory: 'Eliminar Categoría', syncMergeTitle: 'Lista encontrada', syncMerge: 'Combinar', syncReplace: 'Reemplazar', notifyAdd: 'Avisos nuevos productos', notifyCheck: 'Avisos productos comprados', installApp: 'Instalar App', syncHistory: 'Historial de Listas', admin: 'Admin Panel', tabLists: 'Listas', tabCategories: 'Categorías', logout: 'Salir' },
-    ca: { appTitle: 'ShopList', placeholder: 'Afegir producte...', quickAdd: 'Afegir Ràpidament', myList: 'La Meva Llista', clearComp: 'Netejar', empty: 'La teva llista està buida', settings: 'Ajustos', data: 'Còpia', export: 'Exportar', import: 'Importar', notes: 'Notes', saveNote: 'Guardar', add: 'Afegir', cats: { fruit: 'Fruita', veg: 'Verdura', meat: 'Carn/Peix', dairy: 'Làctics', pantry: 'Rebost/Pa', cleaning: 'Higiene/Neteja', home: 'Llar', snacks: 'Snacks/Dolços', frozen: 'Congelats', processed: 'Processats', drinks: 'Begudes', other: 'General/Altres' }, resetBtn: 'Restaurar de Fàbrica', completed: 'Completats', progress: 'Progrés', cancel: 'Cancel·lar', sync: 'Sincronització', createList: 'Crear Llista', join: 'Unir-se', disconnect: 'Desconnectar', modePlan: 'Planificador', modeShop: 'Comprar', manageCatalog: 'Gestió de Productes', tabAccount: 'Compte', tabProducts: 'Productes', tabOther: 'Altres', email: 'Email', password: 'Contrasenya', passwordConfirm: 'Confirmar Contrasenya', login: 'Entrar', register: 'Registrar', loggedAs: 'Connectat com', newCategory: 'Nova Categoria', categoryName: 'Nom', categoryIcon: 'Emoji', deleteCategory: 'Eliminar Categoria', syncMergeTitle: 'Llista trobada', syncMerge: 'Combinar', syncReplace: 'Reemplaçar', notifyAdd: 'Avisos nous productes', notifyCheck: 'Avisos productes comprats', installApp: 'Instal·lar App', syncHistory: 'Historial de Llistes', admin: 'Admin Panel', tabLists: 'Llistes', tabCategories: 'Categories', logout: 'Sortir' },
-    en: { appTitle: 'ShopList', placeholder: 'Add product...', quickAdd: 'Quick Add', myList: 'My List', clearComp: 'Clear', empty: 'Your list is empty', settings: 'Settings', data: 'Backup', export: 'Export', import: 'Import', notes: 'Notes', saveNote: 'Save', add: 'Add', cats: { fruit: 'Fruit', veg: 'Veg', meat: 'Meat/Fish', dairy: 'Dairy', pantry: 'Pantry/Bread', cleaning: 'Cleaning/Hygiene', home: 'Home', snacks: 'Snacks/Sweets', frozen: 'Frozen', processed: 'Processed', drinks: 'Drinks', other: 'General/Other' }, resetBtn: 'Factory Reset', completed: 'Completed', progress: 'Progress', cancel: 'Cancel', sync: 'Sync', createList: 'Create List', join: 'Join', disconnect: 'Disconnect', modePlan: 'Plan', modeShop: 'Shop', manageCatalog: 'Manage Products', tabAccount: 'Account', tabProducts: 'Products', tabOther: 'Other', email: 'Email', password: 'Password', passwordConfirm: 'Confirm Password', login: 'Login', register: 'Register', loggedAs: 'Logged as', newCategory: 'New Category', categoryName: 'Name', categoryIcon: 'Emoji', deleteCategory: 'Delete Category', syncMergeTitle: 'List found', syncMerge: 'Merge', syncReplace: 'Replace', notifyAdd: 'Notify on new products', notifyCheck: 'Notify on purchased products', installApp: 'Install App', syncHistory: 'Sync History', admin: 'Admin Panel', tabLists: 'Lists', tabCategories: 'Categories', logout: 'Logout' }
+    es: { appTitle: 'ShopList', placeholder: 'Añadir producto...', quickAdd: 'Añadir Rápidamente', myList: 'Mi Lista', clearComp: 'Limpiar', empty: 'Tu lista está vacía', settings: 'Ajustes', data: 'Backup', export: 'Exportar', import: 'Importar', notes: 'Notas', saveNote: 'Guardar', add: 'Añadir', cats: { fruit: 'Fruta', veg: 'Verdura', meat: 'Carne/Pescado', dairy: 'Lácteos', pantry: 'Despensa/Pan', cleaning: 'Higiene/Limpieza', home: 'Hogar', snacks: 'Snacks/Dulces', frozen: 'Congelados', processed: 'Procesados', drinks: 'Bebidas', other: 'General/Otros' }, resetBtn: 'Restaurar de Fábrica', completed: 'Completados', progress: 'Progreso', cancel: 'Cancelar', sync: 'Sincronización', createList: 'Crear Lista', join: 'Unirse', disconnect: 'Desconectar', modePlan: 'Planificador', modeShop: 'Comprar', manageCatalog: 'Gestión del Catálogo', tabAccount: 'Cuenta', tabCatalog: 'Catálogo', tabOther: 'Otros', tabAbout: 'Sobre', email: 'Email', password: 'Contraseña', passwordConfirm: 'Confirmar Contraseña', login: 'Entrar', register: 'Registrar', loggedAs: 'Conectado como', newCategory: 'Nueva Categoría', categoryName: 'Nombre', categoryIcon: 'Emoji', deleteCategory: 'Eliminar Categoría', syncMergeTitle: 'Lista encontrada', syncMerge: 'Combinar', syncReplace: 'Reemplazar', notifyAdd: 'Avisos nuevos productos', notifyCheck: 'Avisos productos comprados', installApp: 'Instalar App', syncHistory: 'Historial de Listas', admin: 'Admin Panel', tabLists: 'Listas', tabCategories: 'Categorías', tabUsers: 'Usuarios', logout: 'Salir', username: 'Nombre de usuario', selectCategory: 'Seleccionar categoría', addToCatalog: 'Añadir a mi catálogo', noMatches: 'No se encontraron coincidencias', sortAlpha: 'Nombre', sortCat: 'Categoría', inlineComp: 'Completados en su sitio', viewOptions: 'Opciones de vista', alerts: 'Avisos', theme: 'Tema', themeLight: 'Claro', themeDark: 'Oscuro', themeAmoled: 'AMOLED', aboutDev: 'Hecha por Borja Balsera', aboutProject: 'Proyecto en GitHub', support: 'Apoyar proyecto' },
+    ca: { appTitle: 'ShopList', placeholder: 'Afegir producte...', quickAdd: 'Afegir Ràpidament', myList: 'La Meva Llista', clearComp: 'Netejar', empty: 'La teva llista està buida', settings: 'Ajustos', data: 'Còpia', export: 'Exportar', import: 'Importar', notes: 'Notes', saveNote: 'Guardar', add: 'Afegir', cats: { fruit: 'Fruita', veg: 'Verdura', meat: 'Carn/Peix', dairy: 'Làctics', pantry: 'Rebost/Pa', cleaning: 'Higiene/Neteja', home: 'Llar', snacks: 'Snacks/Dolços', frozen: 'Congelats', processed: 'Processats', drinks: 'Begudes', other: 'General/Altres' }, resetBtn: 'Restaurar de Fàbrica', completed: 'Completats', progress: 'Progrés', cancel: 'Cancel·lar', sync: 'Sincronització', createList: 'Crear Llista', join: 'Unir-se', disconnect: 'Desconnectar', modePlan: 'Planificador', modeShop: 'Comprar', manageCatalog: 'Gestió del Catàleg', tabAccount: 'Compte', tabCatalog: 'Catàleg', tabOther: 'Altres', tabAbout: 'Sobre', email: 'Email', password: 'Contrasenya', passwordConfirm: 'Confirmar Contrasenya', login: 'Entrar', register: 'Registrar', loggedAs: 'Connectat com', newCategory: 'Nova Categoria', categoryName: 'Nom', categoryIcon: 'Emoji', deleteCategory: 'Eliminar Categoria', syncMergeTitle: 'Llista trobada', syncMerge: 'Combinar', syncReplace: 'Reemplaçar', notifyAdd: 'Avisos nous productes', notifyCheck: 'Avisos productes comprats', installApp: 'Instal·lar App', syncHistory: 'Historial de Llistes', admin: 'Admin Panel', tabLists: 'Llistes', tabCategories: 'Categories', tabUsers: 'Usuaris', logout: 'Sortir', username: 'Nom d\'usuari', selectCategory: 'Selecciona categoria', addToCatalog: 'Afegir al meu catàleg', noMatches: 'No s\'han trobat coincidències', sortAlpha: 'Nom', sortCat: 'Categoria', inlineComp: 'Completats al seu lloc', viewOptions: 'Opcions de vista', alerts: 'Avisos', theme: 'Tema', themeLight: 'Clar', themeDark: 'Fosc', themeAmoled: 'AMOLED', aboutDev: 'Feta per Borja Balsera', aboutProject: 'Projecte a GitHub', support: 'Donar suport' },
+    en: { appTitle: 'ShopList', placeholder: 'Add product...', quickAdd: 'Quick Add', myList: 'My List', clearComp: 'Clear', empty: 'Your list is empty', settings: 'Settings', data: 'Backup', export: 'Export', import: 'Import', notes: 'Notes', saveNote: 'Save', add: 'Add', cats: { fruit: 'Fruit', veg: 'Veg', meat: 'Meat/Fish', dairy: 'Dairy', pantry: 'Pantry/Bread', cleaning: 'Cleaning/Hygiene', home: 'Home', snacks: 'Snacks/Sweets', frozen: 'Frozen', processed: 'Processed', drinks: 'Drinks', other: 'General/Other' }, resetBtn: 'Factory Reset', completed: 'Completed', progress: 'Progress', cancel: 'Cancel', sync: 'Sync', createList: 'Create List', join: 'Join', disconnect: 'Disconnect', modePlan: 'Plan', modeShop: 'Shop', manageCatalog: 'Manage Catalog', tabAccount: 'Account', tabCatalog: 'Catalog', tabOther: 'Other', tabAbout: 'About', email: 'Email', password: 'Password', passwordConfirm: 'Confirm Password', login: 'Login', register: 'Register', loggedAs: 'Logged as', newCategory: 'New Category', categoryName: 'Name', categoryIcon: 'Emoji', deleteCategory: 'Delete Category', syncMergeTitle: 'List found', syncMerge: 'Merge', syncReplace: 'Replace', notifyAdd: 'Notify on new products', notifyCheck: 'Notify on purchased products', installApp: 'Install App', syncHistory: 'Sync History', admin: 'Admin Panel', tabLists: 'Lists', tabCategories: 'Categories', tabUsers: 'Users', logout: 'Logout', username: 'Username', selectCategory: 'Select category', addToCatalog: 'Add to my catalog', noMatches: 'No matches found', sortAlpha: 'Name', sortCat: 'Category', inlineComp: 'Stay in place', viewOptions: 'View options', alerts: 'Alerts', theme: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeAmoled: 'AMOLED', aboutDev: 'Made by Borja Balsera', aboutProject: 'GitHub Project', support: 'Support project' }
 };
 
 export const defaultCategories: Categories = {
@@ -42,6 +42,7 @@ export const defaultCategories: Categories = {
             { es: 'Zanahorias', ca: 'Pastanagues', en: 'Carrots' },
             { es: 'Pimientos', ca: 'Pebrots', en: 'Peppers' },
             { es: 'Calabacín', ca: 'Carbassó', en: 'Zucchini' },
+            { es: 'Rúcula', ca: 'Ruca', en: 'Arugula' },
             { es: 'Berenjena', ca: 'Albergínia', en: 'Eggplant' },
             { es: 'Brócoli', ca: 'Bròcoli', en: 'Broccoli' },
             { es: 'Coliflor', ca: 'Coliflor', en: 'Cauliflower' },
@@ -79,6 +80,7 @@ export const defaultCategories: Categories = {
             { es: 'Mejillones', ca: 'Musclos', en: 'Mussels' },
             { es: 'Calamares', ca: 'Calamars', en: 'Squid' },
             { es: 'Bacalao', ca: 'Bacallà', en: 'Cod' },
+            { es: 'Rape', ca: 'Rap', en: 'Monkfish' },
             { es: 'Carne picada', ca: 'Carn picada', en: 'Minced meat' }
         ]
     },
@@ -91,6 +93,7 @@ export const defaultCategories: Categories = {
             { es: 'Mantequilla', ca: 'Mantega', en: 'Butter' },
             { es: 'Nata', ca: 'Nata', en: 'Cream' },
             { es: 'Huevos', ca: 'Ous', en: 'Eggs' },
+            { es: 'Clara 0,0', ca: 'Clara 0,0', en: 'Egg whites' },
             { es: 'Queso rallado', ca: 'Formatge ratllat', en: 'Grated cheese' },
             { es: 'Leche de avena', ca: 'Llet d\'avena', en: 'Oat milk' },
             { es: 'Leche de soja', ca: 'Llet de soja', en: 'Soy milk' },
@@ -126,6 +129,14 @@ export const defaultCategories: Categories = {
             { es: 'Miel', ca: 'Mel', en: 'Honey' },
             { es: 'Caldo', ca: 'Brou', en: 'Broth' },
             { es: 'Especias', ca: 'Espècies', en: 'Spices' },
+            { es: 'Ajo molido', ca: 'All mofalt', en: 'Garlic powder' },
+            { es: 'Bulgur', ca: 'Bulgur', en: 'Bulgur' },
+            { es: 'Tomillo', ca: 'Farigola', en: 'Thyme' },
+            { es: 'Estevia en hoja', ca: 'Estèvia en fulla', en: 'Stevia leaves' },
+            { es: 'Harina de sarraceno', ca: 'Farina de fajol', en: 'Buckwheat flour' },
+            { es: 'Fideos de arroz', ca: 'Fideus d\'arròs', en: 'Rice noodles' },
+            { es: 'Flocs de civada', ca: 'Flocs de civada', en: 'Oat flakes' },
+            { es: 'Pan de vidrio', ca: 'Pa de vidre', en: 'Glass bread' },
             { es: 'Frutos secos', ca: 'Fruits secs', en: 'Nuts' },
             { es: 'Pan de molde', ca: 'Pa de molde', en: 'Sliced bread' }
         ]
@@ -150,7 +161,11 @@ export const defaultCategories: Categories = {
             { es: 'Papel cocina', ca: 'Paper cuina', en: 'Kitchen paper' },
             { es: 'Servilletas', ca: 'Torallons', en: 'Napkins' },
             { es: 'Compresas', ca: 'Compreses', en: 'Pads' },
-            { es: 'Pañuelos', ca: 'Mocadors', en: 'Tissues' }
+            { es: 'Pañuelos', ca: 'Mocadors', en: 'Tissues' },
+            { es: 'Caja de pañuelos', ca: 'Caixa de mocadors', en: 'Tissue box' },
+            { es: 'Bolsas basura orgánica', ca: 'Bosses escombraries orgànica', en: 'Organic trash bags' },
+            { es: 'Papel absorbente', ca: 'Paper absorbent', en: 'Absorbent paper' },
+            { es: 'Papel WC húmedo', ca: 'Paper WC humit', en: 'Wet toilet paper' }
         ]
     },
     home: {
@@ -163,7 +178,8 @@ export const defaultCategories: Categories = {
             { es: 'Velas', ca: 'Espelmes', en: 'Candles' },
             { es: 'Cerillas', ca: 'Mistus', en: 'Matches' },
             { es: 'Cinta adhesiva', ca: 'Cinta adhesiva', en: 'Adhesive tape' },
-            { es: 'Filtros café', ca: 'Filtres cafè', en: 'Coffee filters' }
+            { es: 'Filtros café', ca: 'Filtres cafè', en: 'Coffee filters' },
+            { es: 'Papel de horno', ca: 'Paper de forn', en: 'Baking paper' }
         ]
     },
     snacks: {
@@ -176,7 +192,11 @@ export const defaultCategories: Categories = {
             { es: 'Palomitas', ca: 'Crispetes', en: 'Popcorn' },
             { es: 'Tortitas de arroz', ca: 'Tortitas d\'arròs', en: 'Rice cakes' },
             { es: 'Barritas cereales', ca: 'Barretes cereals', en: 'Cereal bars' },
-            { es: 'Helado', ca: 'Gelat', en: 'Ice cream' }
+            { es: 'Helado', ca: 'Gelat', en: 'Ice cream' },
+            { es: 'Bizcocho', ca: 'Biscuit', en: 'Sponge cake' },
+            { es: 'Gelatina neutra', ca: 'Gelatina neutra', en: 'Neutral gelatin' },
+            { es: 'Gelatina limón', ca: 'Gelatina llimona', en: 'Lemon gelatin' },
+            { es: 'Nachos', ca: 'Nachos', en: 'Nachos' }
         ]
     },
     frozen: {
@@ -210,6 +230,8 @@ export const defaultCategories: Categories = {
             { es: 'Agua', ca: 'Aigua', en: 'Water' },
             { es: 'Vino', ca: 'Vi', en: 'Wine' },
             { es: 'Cerveza', ca: 'Cervesa', en: 'Beer' },
+            { es: 'Cerveza 0,0', ca: 'Cervesa 0,0', en: 'Beer 0,0' },
+            { es: 'Garrafa Agua', ca: 'Garrafa Aigua', en: 'Water jug' },
             { es: 'Refrescos', ca: 'Refrescos', en: 'Soft drinks' },
             { es: 'Zumo', ca: 'Suc', en: 'Juice' },
             { es: 'Leche', ca: 'Llet', en: 'Milk' },
@@ -230,17 +252,17 @@ export const defaultCategories: Categories = {
     }
 };
 
-export const categoryStyles: Record<string, { bgSolid: string, active: string, pill: string }> = {
-    fruit: { bgSolid: 'bg-red-400', active: 'bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 border-red-400', pill: 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300' },
-    veg: { bgSolid: 'bg-green-500', active: 'bg-green-50 dark:bg-green-900/10 text-green-600 dark:text-green-400 border-green-500', pill: 'text-green-700 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' },
-    meat: { bgSolid: 'bg-rose-500', active: 'bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 border-rose-500', pill: 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300' },
-    dairy: { bgSolid: 'bg-blue-400', active: 'bg-blue-50 dark:bg-blue-900/10 text-blue-500 dark:text-blue-400 border-blue-400', pill: 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300' },
-    pantry: { bgSolid: 'bg-amber-500', active: 'bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 border-amber-500', pill: 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300' },
-    cleaning: { bgSolid: 'bg-cyan-500', active: 'bg-cyan-50 dark:bg-cyan-900/10 text-cyan-600 dark:text-cyan-400 border-cyan-500', pill: 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-800 dark:text-cyan-300' },
-    home: { bgSolid: 'bg-indigo-500', active: 'bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 border-indigo-500', pill: 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-300' },
-    snacks: { bgSolid: 'bg-pink-500', active: 'bg-pink-50 dark:bg-pink-900/10 text-pink-600 dark:text-pink-400 border-pink-500', pill: 'text-pink-700 bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-800 dark:text-pink-300' },
-    frozen: { bgSolid: 'bg-sky-500', active: 'bg-sky-50 dark:bg-sky-900/10 text-sky-600 dark:text-sky-400 border-sky-500', pill: 'text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-900/20 dark:border-sky-800 dark:text-sky-300' },
-    processed: { bgSolid: 'bg-orange-500', active: 'bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400 border-orange-500', pill: 'text-orange-700 bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300' },
-    drinks: { bgSolid: 'bg-teal-500', active: 'bg-teal-50 dark:bg-teal-900/10 text-teal-600 dark:text-teal-400 border-teal-500', pill: 'text-teal-700 bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300' },
-    other: { bgSolid: 'bg-slate-400', active: 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-slate-400', pill: 'text-slate-600 bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300' }
+export const categoryStyles: Record<string, { bgSolid: string, active: string, pill: string, border: string, text: string }> = {
+    fruit: { bgSolid: 'bg-red-500', active: 'bg-red-500 text-white border-red-500', pill: 'bg-red-50 text-red-700 border-red-100', border: 'border-red-500', text: 'text-red-500' },
+    veg: { bgSolid: 'bg-green-500', active: 'bg-green-500 text-white border-green-500', pill: 'bg-green-50 text-green-700 border-green-100', border: 'border-green-500', text: 'text-green-500' },
+    meat: { bgSolid: 'bg-amber-700', active: 'bg-amber-700 text-white border-amber-700', pill: 'bg-amber-50 text-amber-900 border-amber-100', border: 'border-amber-700', text: 'text-amber-700' },
+    dairy: { bgSolid: 'bg-blue-400', active: 'bg-blue-400 text-white border-blue-400', pill: 'bg-blue-50 text-blue-700 border-blue-100', border: 'border-blue-400', text: 'text-blue-400' },
+    pantry: { bgSolid: 'bg-orange-400', active: 'bg-orange-400 text-white border-orange-400', pill: 'bg-orange-50 text-orange-800 border-orange-100', border: 'border-orange-400', text: 'text-orange-400' },
+    cleaning: { bgSolid: 'bg-purple-400', active: 'bg-purple-400 text-white border-purple-400', pill: 'bg-purple-50 text-purple-700 border-purple-100', border: 'border-purple-400', text: 'text-purple-400' },
+    home: { bgSolid: 'bg-slate-500', active: 'bg-slate-500 text-white border-slate-500', pill: 'bg-slate-50 text-slate-700 border-slate-100', border: 'border-slate-500', text: 'text-slate-500' },
+    snacks: { bgSolid: 'bg-pink-400', active: 'bg-pink-400 text-white border-pink-400', pill: 'bg-pink-50 text-pink-700 border-pink-100', border: 'border-pink-400', text: 'text-pink-400' },
+    frozen: { bgSolid: 'bg-cyan-500', active: 'bg-cyan-500 text-white border-cyan-500', pill: 'bg-cyan-50 text-cyan-700 border-cyan-100', border: 'border-cyan-500', text: 'text-cyan-500' },
+    processed: { bgSolid: 'bg-rose-400', active: 'bg-rose-400 text-white border-rose-400', pill: 'bg-rose-50 text-rose-700 border-rose-100', border: 'border-rose-400', text: 'text-rose-400' },
+    drinks: { bgSolid: 'bg-indigo-500', active: 'bg-indigo-500 text-white border-indigo-500', pill: 'bg-indigo-50 text-indigo-700 border-indigo-100', border: 'border-indigo-500', text: 'text-indigo-500' },
+    other: { bgSolid: 'bg-slate-400', active: 'bg-slate-400 text-white border-slate-400', pill: 'bg-slate-50 text-slate-600 border-slate-100', border: 'border-slate-400', text: 'text-slate-400' }
 };

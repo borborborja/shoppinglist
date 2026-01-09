@@ -4,12 +4,14 @@ import { useShopStore } from '../../store/shopStore';
 import { categoryStyles, translations } from '../../data/constants';
 import { getLocalizedItemName } from '../../utils/helpers';
 import type { LocalizedItem } from '../../types';
+import AddCategoryModal from '../modals/AddCategoryModal';
 
 const CategoryList = () => {
     const { categories, addItem, lang, addCategoryItem, removeCategoryItem } = useShopStore();
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [isQuickEditMode, setIsQuickEditMode] = useState(false);
     const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [quickAddValue, setQuickAddValue] = useState('');
 
     const t = translations[lang];
@@ -55,7 +57,7 @@ const CategoryList = () => {
                         <button
                             key={key}
                             onClick={() => toggleCategory(key)}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border shadow-sm outline-none ${isActive
+                            className={`px-3 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-2 border shadow-sm outline-none ${isActive
                                 ? style.active
                                 : 'bg-white dark:bg-darkSurface text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-700'
                                 }`}
@@ -65,6 +67,15 @@ const CategoryList = () => {
                         </button>
                     );
                 })}
+
+                {/* Add Category Button */}
+                <button
+                    onClick={() => setShowAddCategoryModal(true)}
+                    className="px-3 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-2 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:text-blue-500 hover:border-blue-500 bg-transparent"
+                >
+                    <Plus size={16} />
+                    <span>{t.add}</span>
+                </button>
             </div>
 
             {/* Expansion Panel */}
@@ -101,7 +112,7 @@ const CategoryList = () => {
                                 <div key={idx} className="relative group">
                                     <button
                                         onClick={() => isQuickEditMode ? removeCategoryItem(activeCategory, idx) : handleAddItem(item)}
-                                        className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-sm outline-none dark:bg-opacity-20 ${style.pill
+                                        className={`inline-flex items-center sm:px-3 px-2 sm:py-1.5 py-1 sm:rounded-lg rounded-md sm:text-xs text-[10px] font-semibold transition-all border shadow-sm outline-none dark:bg-opacity-20 ${style.pill
                                             } ${isQuickEditMode ? 'animate-pulse border-red-300 text-red-500 ring-1 ring-red-500/20' : ''}`}
                                     >
                                         {getLocalizedItemName(item, lang)}
@@ -146,6 +157,10 @@ const CategoryList = () => {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* Add Category Modal */}
+            {showAddCategoryModal && (
+                <AddCategoryModal onClose={() => setShowAddCategoryModal(false)} />
             )}
         </div>
     );

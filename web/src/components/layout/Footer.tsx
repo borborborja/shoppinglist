@@ -51,15 +51,12 @@ const Footer = ({ installPrompt, onInstall }: FooterProps) => {
                         )}
                     </div>
                     <div className="flex flex-col items-center gap-0.5">
-                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">
-                            &copy; ShopList v2.6 (2026-01-08-1830)
-                        </div>
                         {sync.connected && sync.lastSync && (
                             <div className="text-[8px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-tight flex items-center gap-1">
                                 <div className={`w-1 h-1 rounded-full ${Date.now() - sync.lastSync < 60000 ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
                                 {Date.now() - sync.lastSync < 30000
                                     ? (lang === 'ca' ? 'En línia' : 'En línea')
-                                    : (lang === 'ca' ? `Sincronitzat fa ${Math.round((Date.now() - sync.lastSync) / 60000)}m` : `Sincronizado fa ${Math.round((Date.now() - sync.lastSync) / 60000)}m`)}
+                                    : (lang === 'ca' ? `Sincronitzat fa ${Math.round((Date.now() - sync.lastSync) / 60000)}m` : `Sincronizado hace ${Math.round((Date.now() - sync.lastSync) / 60000)}m`)}
                             </div>
                         )}
                     </div>

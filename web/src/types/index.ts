@@ -26,10 +26,17 @@ export interface ShopItem {
 export type AppMode = 'planning' | 'shopping';
 export type ViewMode = 'list' | 'compact' | 'grid';
 export type Lang = 'ca' | 'es' | 'en';
-export type SettingsTab = 'account' | 'products' | 'other';
+export type SettingsTab = 'account' | 'catalog' | 'other' | 'about';
 
 export interface AuthState {
     isLoggedIn: boolean;
     email: string | null;
     userId: string | null;
+    username: string | null;
+}
+
+export interface PresenceUser {
+    id: string;
+    username: string;
+    lastActiveAt: string;
 }

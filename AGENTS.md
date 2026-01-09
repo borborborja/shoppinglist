@@ -88,6 +88,48 @@ COPY --from=frontend-builder /app/web/dist /app/pb_public
 
 ---
 
+## 💎 Best Practices (The Gold Standard)
+
+### 1. 🔐 Security & Configuration
+*   **Centralized Management**: All server-wide settings (e.g., Server Name, list limits, external API keys) must be managed via the `/admin` URL, protected by password/auth. The **Admin Panel** must serve to manage and maintain PocketBase (PB) catalogs, among other administrative tasks.
+*   **Access Rules (API Rules)**: Keep PocketBase collection rules to the minimum required privilege. Always validate that `list_code` or `auth.id` matches the requested resource.
+
+### 2. ⚡ Frontend Performance (React + Zustand)
+*   **Atomic Selectors**: To prevent unnecessary re-renders, components should subscribe to the store using specific selectors.
+    *   ❌ `const state = useShopStore()`
+    *   ✅ `const items = useShopStore(s => s.items)`
+*   **Lazy Loading**: Admin views and heavy components should be loaded via `React.lazy` to optimize the initial load time (FCP).
+
+### 3. 🔄 Synchronization & Offline State
+*   **Optimistic Updates**: Implement optimistic UI updates for tactile changes (check/uncheck, add item) to provide an instant speed feel.
+*   **Data Conflicts**: Follow the "Last Write Wins" (LWW) policy for most fields, prioritizing simplicity and a seamless real-time user experience.
+
+### 4. 🛠️ Robustness & Maintenance
+*   **Migrations**: It is mandatory to document any schema changes in the `pb_migrations` folder. Never modify the schema manually in production without a corresponding migration.
+*   **Strict Typing**: Shared data types must be defined in `web/src/types/index.ts`. Using `any` is strictly prohibited.
+
+---
+
+## 🎨 Visual & Iconography Standards
+
+### 1.  Iconography System
+*   **UI/Actions (Monochrome Elegant)**: The rest of the interface (navigation, settings, actions, etc.) must use **elegant monochrome icons** (e.g., Lucide, Phosphor). This maintains a professional, premium, and clean look, avoiding visual clutter.
+
+### 2. ✨ Premium Glassmorphism
+*   **Overlays**: Use `backdrop-blur` and semi-transparent backgrounds for modals, headers, and floating elements.
+*   **Borders**: Subtle, light-colored borders (e.g., `border-white/20`) to define edges on top of glossy surfaces.
+
+### 3. 🌈 Color & Gradients
+*   **Backgrounds**: Use vibrant, multi-stop linear/radial gradients (e.g., `from-blue-50 via-indigo-50 to-purple-50`).
+*   **Dark Mode**: First-class support for standard **Dark** and **Pure Black (AMOLED)**. Ensure contrast ratios remain accessible.
+*   **Action Colors**: Use consistent feedback colors (e.g., Indigo for primary actions, Emerald for success, Rose for deletions).
+
+### 4. 📐 Layout & Typography
+*   **Mobile-First**: Every UI element must be touch-friendly (minimum 44px hit area) and look great on narrow screens.
+*   **Fonts**: Use modern, high-legibility sans-serif fonts (e.g., Outfit, Inter).
+
+---
+
 ## 📂 Implementation Hints
 *   **Game Loop**: Use a `time.Ticker` in a Goroutine for turn timers, separate from the request handling.
 *   **Broadcasting**: Use a Hub pattern to manage WebSocket connections.

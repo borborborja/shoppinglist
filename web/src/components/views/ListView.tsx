@@ -1,42 +1,63 @@
-import { useState } from 'react';
-import { Check, Trash2, X, List, LayoutGrid, AlignJustify, StickyNote, ShoppingBasket, Pen } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Check, Trash2, List, LayoutGrid, AlignJustify, StickyNote, ShoppingBasket, Pen, MoreHorizontal, Filter } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, defaultCategories } from '../../data/constants';
 import type { ShopItem } from '../../types';
 import ProductModal from '../modals/ProductModal';
 
 const ListView = () => {
-    const { items, categories, lang, viewMode, setViewMode, toggleCheck, deleteItem, clearCompleted, sync } = useShopStore();
+    const { items, categories, lang, viewMode, appMode, setViewMode, toggleCheck, deleteItem, clearCompleted, sync, activeUsers, sortOrder, setSortOrder, showCompletedInline, setShowCompletedInline } = useShopStore();
     const t = translations[lang];
     const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
+    const [showOptions, setShowOptions] = useState(false);
+    const optionsRef = useRef<HTMLDivElement>(null);
+
+    // Close options menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target as Node)) {
+                setShowOptions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Computed
-    const completedItems = items.filter(i => i.checked);
-    const activeItems = items.filter(i => !i.checked);
+    const completedItems = items.filter(i => i.checked).sort((a, b) => a.name.localeCompare(b.name));
 
-    const activeItemsGrouped: Record<string, ShopItem[]> = {};
-    activeItems.forEach(item => {
-        const cat = item.category || 'other';
-        if (!activeItemsGrouped[cat]) activeItemsGrouped[cat] = [];
-        activeItemsGrouped[cat].push(item);
-    });
+    // itemsToShow: if inline, all items. if not inline, only active items.
+    const itemsToShow = showCompletedInline ? items : items.filter(i => !i.checked);
+
+    const itemsSorted = sortOrder === 'alpha'
+        ? [...itemsToShow].sort((a, b) => a.name.localeCompare(b.name))
+        : itemsToShow;
+
+    const itemsGrouped: Record<string, ShopItem[]> = {};
+    if (sortOrder === 'category') {
+        itemsSorted.forEach(item => {
+            const cat = item.category || 'other';
+            if (!itemsGrouped[cat]) itemsGrouped[cat] = [];
+            itemsGrouped[cat].push(item);
+        });
+    }
 
     const getModeIcon = () => {
-        if (viewMode === 'list') return <List size={14} />;
-        if (viewMode === 'compact') return <AlignJustify size={14} />;
-        return <LayoutGrid size={14} />;
-    };
-
-    const getModeText = () => {
-        if (viewMode === 'list') return 'List';
-        if (viewMode === 'compact') return 'Compact';
-        return 'Grid'; // Simplified for now, or use translation
+        if (viewMode === 'list') return <List size={18} />;
+        if (viewMode === 'compact') return <AlignJustify size={18} />;
+        return <LayoutGrid size={18} />;
     };
 
     const cycleViewMode = () => {
         const modes = ['list', 'compact', 'grid'] as const;
-        const currentIdx = modes.indexOf(viewMode);
-        setViewMode(modes[(currentIdx + 1) % modes.length]);
+        let nextIdx = (modes.indexOf(viewMode) + 1) % modes.length;
+
+        // Skip grid in planning mode
+        if (appMode === 'planning' && modes[nextIdx] === 'grid') {
+            nextIdx = (nextIdx + 1) % modes.length;
+        }
+
+        setViewMode(modes[nextIdx]);
     };
 
     const getItemClass = () => {
@@ -52,8 +73,86 @@ const ListView = () => {
         if (navigator.vibrate) navigator.vibrate(10);
     };
 
+    // Sub-components for cleaner rendering
+    const ItemCard = ({ item, style }: { item: ShopItem, style: any }) => (
+        <div
+            onClick={() => {
+                if (appMode === 'shopping') {
+                    toggleCheck(item.id);
+                } else {
+                    setEditingItem(item);
+                }
+                if (navigator.vibrate) navigator.vibrate(5);
+            }}
+            className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] ${getItemClass()} ${item.checked
+                ? 'bg-slate-50 dark:bg-slate-800/40 border-transparent grayscale'
+                : 'bg-white dark:bg-darkSurface border-slate-100 dark:border-slate-700/50 hover:shadow-md'}`}
+        >
+            <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.checked ? 'bg-slate-300 dark:bg-slate-600' : style.bgSolid}`}></div>
+            <div className="flex-shrink-0 ml-2 mr-3" onClick={(e) => e.stopPropagation()}>
+                <button
+                    onClick={() => { toggleCheck(item.id); if (navigator.vibrate) navigator.vibrate(5); }}
+                    className={`rounded-full border-2 flex items-center justify-center transition-all ${item.checked
+                        ? 'border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white'
+                        : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 bg-transparent text-transparent'
+                        } ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}
+                >
+                    <Check size={viewMode === 'compact' ? 10 : 14} className={item.checked ? 'opacity-100' : 'opacity-0'} />
+                </button>
+            </div>
+            <div className="flex-grow overflow-hidden py-1">
+                <p className={`font-bold truncate transition-all ${item.checked
+                    ? 'line-through text-slate-400'
+                    : 'text-slate-700 dark:text-slate-200'} ${viewMode === 'compact' ? 'text-xs' : (viewMode === 'grid' ? 'text-[11px]' : 'text-sm')}`}>
+                    {item.name}
+                </p>
+                {item.note && viewMode !== 'compact' && (
+                    <p className="text-[10px] text-slate-400 truncate mt-0.5 flex items-center gap-1">
+                        <StickyNote size={10} /> {item.note}
+                    </p>
+                )}
+            </div>
+            {appMode === 'planning' && (
+                <div className="flex items-center pr-1 h-full">
+                    {!item.checked && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
+                            className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition mr-1"
+                        >
+                            <Pen size={14} />
+                        </button>
+                    )}
+                    <button
+                        onClick={(e) => handleDelete(item.id, e)}
+                        className={`w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition ${item.checked ? '' : 'mr-1'}`}
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+
+    const CompletedSection = () => {
+        if (showCompletedInline || completedItems.length === 0) return null;
+        return (
+            <div className={`mt-8 mb-8 pt-6 border-t border-dashed border-slate-200 dark:border-slate-700/50 opacity-60 hover:opacity-100 transition-opacity`}>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
+                    <span>{t.completed}</span>
+                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">{completedItems.length}</span>
+                </h3>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                    {completedItems.map(item => {
+                        const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
+                        return <ItemCard key={item.id} item={item} style={style} />;
+                    })}
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div>
+        <div className="relative z-0">
             {/* List Header */}
             <div className="flex justify-between items-end mb-4 px-1">
                 <div className="flex items-center gap-2">
@@ -62,13 +161,65 @@ const ListView = () => {
                         <div className="flex items-center justify-center w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
                     )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 relative">
+                    {/* View Switcher (Back outside) */}
                     <button
                         onClick={cycleViewMode}
-                        className="flex items-center gap-2 text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg transition shadow-sm"
+                        className="flex items-center justify-center w-9 h-9 text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95"
                     >
-                        {getModeIcon()} {getModeText()}
+                        {getModeIcon()}
                     </button>
+
+                    {/* View Options Menu Trigger */}
+                    <div ref={optionsRef}>
+                        <button
+                            onClick={() => setShowOptions(!showOptions)}
+                            className={`flex items-center justify-center w-9 h-9 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 ${showOptions ? 'ring-2 ring-blue-500/20 text-blue-500' : 'text-slate-500'}`}
+                            title={t.viewOptions}
+                        >
+                            <MoreHorizontal size={20} />
+                        </button>
+
+                        {/* Discreet Options Menu */}
+                        {showOptions && (
+                            <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 z-50 animate-pop overflow-hidden">
+                                <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 dark:border-slate-800/50 mb-1">
+                                    {t.viewOptions}
+                                </div>
+
+                                {/* Sort Mode */}
+                                <button
+                                    onClick={() => { setSortOrder(sortOrder === 'category' ? 'alpha' : 'category'); setShowOptions(false); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
+                                >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${sortOrder === 'alpha' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                        <Filter size={16} />
+                                    </div>
+                                    <div className="text-left leading-tight">
+                                        <div className="text-xs font-bold uppercase tracking-wide">
+                                            {sortOrder === 'alpha' ? 'Agrupar: Categoría' : 'Agrupar: Alfabético'}
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {/* Inline Completed */}
+                                <button
+                                    onClick={() => { setShowCompletedInline(!showCompletedInline); setShowOptions(false); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
+                                >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${showCompletedInline ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                        <Check size={16} />
+                                    </div>
+                                    <div className="text-left leading-tight">
+                                        <div className="text-xs font-bold uppercase tracking-wide">
+                                            {t.inlineComp}
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     {completedItems.length > 0 && (
                         <button
                             onClick={() => { if (confirm(t.clearComp + '?')) clearCompleted(); }}
@@ -90,109 +241,54 @@ const ListView = () => {
                 </div>
             )}
 
-            {/* Active Items */}
-            {Object.entries(activeItemsGrouped).map(([key, groupItems]) => {
-                const catDef = categories[key] || defaultCategories['other'];
-                const style = categoryStyles[key] || categoryStyles['other'];
+            {/* Combined List Rendering based on showCompletedInline */}
+            <div className="flex flex-col">
+                {/* Items Section */}
+                {sortOrder === 'category' ? (
+                    Object.entries(itemsGrouped).map(([key, groupItems]) => {
+                        const catDef = categories[key] || defaultCategories['other'];
+                        const style = categoryStyles[key] || categoryStyles['other'];
 
-                return (
-                    <div key={key} className="mb-2 animate-slide-up">
-                        <div className="flex items-center gap-2 mb-2 pl-1">
-                            <span className="text-lg">{catDef.icon}</span>
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                {t.cats[key as keyof typeof t.cats] || key}
-                            </h3>
-                            <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
+                        return (
+                            <div key={key} className="mb-2 animate-slide-up">
+                                <div className="flex items-center gap-2 mb-2 pl-1">
+                                    <span className="text-lg">{catDef.icon}</span>
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                        {t.cats[key as keyof typeof t.cats] || key}
+                                    </h3>
+                                    <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
+                                </div>
+                                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                                    {groupItems.map(item => <ItemCard key={item.id} item={item} style={style} />)}
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    itemsSorted.length > 0 && (
+                        <div className="mb-2 animate-slide-up">
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                                {itemsSorted.map(item => {
+                                    const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
+                                    return <ItemCard key={item.id} item={item} style={style} />;
+                                })}
+                            </div>
                         </div>
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                            {groupItems.map(item => (
-                                <div
-                                    key={item.id}
-                                    onClick={() => { toggleCheck(item.id); if (navigator.vibrate) navigator.vibrate(5); }}
-                                    className={`group relative flex items-center bg-white dark:bg-darkSurface rounded-xl transition-all border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md overflow-hidden cursor-pointer active:scale-[0.99] ${getItemClass()}`}
-                                >
-                                    {/* Accent */}
-                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${style.bgSolid}`}></div>
+                    )
+                )}
 
-                                    {/* Check */}
-                                    <div className="flex-shrink-0 ml-2 mr-3 z-10" onClick={(e) => e.stopPropagation()}>
-                                        <button
-                                            onClick={() => { toggleCheck(item.id); if (navigator.vibrate) navigator.vibrate(5); }}
-                                            className={`rounded-full border-2 border-slate-300 dark:border-slate-600 hover:border-blue-500 flex items-center justify-center transition-all bg-transparent text-transparent ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'
-                                                }`}
-                                        >
-                                            <Check size={viewMode === 'compact' ? 10 : 14} className="opacity-0" />
-                                        </button>
-                                    </div>
+                <CompletedSection />
+            </div>
 
-                                    {/* Content */}
-                                    <div className="flex-grow overflow-hidden z-10 py-1">
-                                        <p className={`font-bold truncate text-slate-700 dark:text-slate-200 ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}>
-                                            {item.name}
-                                        </p>
-                                        {item.note && viewMode !== 'compact' && (
-                                            <p className="text-[10px] text-slate-400 truncate mt-0.5 flex items-center gap-1">
-                                                <StickyNote size={10} /> {item.note}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Edit */}
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition z-10 opacity-0 group-hover:opacity-100 mr-1"
-                                    >
-                                        <Pen size={14} />
-                                    </button>
-
-                                    {/* Delete */}
-                                    <button
-                                        onClick={(e) => handleDelete(item.id, e)}
-                                        className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition z-10 opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            })}
-
-            {/* Completed Items */}
-            {completedItems.length > 0 && (
-                <div className="mt-8 pt-6 border-t border-dashed border-slate-200 dark:border-slate-700/50 opacity-60 hover:opacity-100 transition-opacity">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
-                        <span>{t.completed}</span>
-                        <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">{completedItems.length}</span>
-                    </h3>
-                    <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                        {completedItems.map(item => (
-                            <div
-                                key={item.id}
-                                onClick={() => setEditingItem(item)}
-                                className={`flex items-center bg-slate-50 dark:bg-slate-800/50 rounded-xl transition-all border border-transparent grayscale cursor-pointer ${getItemClass()}`}
-                            >
-                                <div className="flex-shrink-0 mr-3" onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                        onClick={() => toggleCheck(item.id)}
-                                        className={`rounded-full border-2 border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white flex items-center justify-center ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'
-                                            }`}
-                                    >
-                                        <Check size={viewMode === 'compact' ? 10 : 14} />
-                                    </button>
-                                </div>
-                                <div className="flex-grow overflow-hidden">
-                                    <p className={`font-medium truncate transition-all line-through text-slate-400 ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}>
-                                        {item.name}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={(e) => handleDelete(item.id, e)}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-slate-200 rounded-lg"
-                                >
-                                    <X size={16} />
-                                </button>
+            {/* Active Users */}
+            {sync.connected && activeUsers.length > 0 && (
+                <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Viendo ahora:</span>
+                        {activeUsers.map(user => (
+                            <div key={user.id} className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700 animate-pulse-slow">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
+                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{user.username}</span>
                             </div>
                         ))}
                     </div>
