@@ -9,11 +9,13 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface SettingsModalProps {
     onClose: () => void;
+    installPrompt?: any;
+    onInstall?: () => void;
 }
 
-const SettingsModal = ({ onClose }: SettingsModalProps) => {
+const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps) => {
     const {
-        lang, theme, setTheme,
+        lang, setLang, theme, setTheme,
         notifyOnAdd, notifyOnCheck, setNotifyOnAdd, setNotifyOnCheck,
         categories, addCategoryItem, removeCategoryItem, addCategory, removeCategory,
         items, resetDefaults, importData,
@@ -595,26 +597,62 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
             </div>
 
             {/* System Actions Area */}
+            {/* Compact System & PWA Area */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                <button
-                    onClick={() => {
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.getRegistrations().then(registrations => {
-                                for (let registration of registrations) registration.unregister();
-                                window.location.reload();
-                            });
-                        } else {
-                            window.location.reload();
-                        }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs transition hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98]"
-                >
-                    <RefreshCw size={14} /> Forzar Actualización (PWA)
-                </button>
+                <div className="flex gap-2">
+                    <div className="flex-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative">
+                        {/* Language Selector */}
+                        {['ca', 'es', 'en'].map((l) => (
+                            <button
+                                key={l}
+                                onClick={() => { setLang(l as any); if (navigator.vibrate) navigator.vibrate(10); }}
+                                className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${lang === l ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-white shadow-sm' : 'text-slate-400'}`}
+                            >
+                                {l}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                <button onClick={() => { if (confirm(t.resetBtn + '?')) { resetDefaults(); onClose(); } }} className="w-full text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 border-2 border-red-100 dark:border-red-900/30 p-3 rounded-2xl transition flex items-center justify-center gap-2 active:scale-[0.98]">
-                    <Trash2 size={14} /> {t.resetBtn}
-                </button>
+                {/* Install App Button - Discrete */}
+                {installPrompt && (
+                    <button
+                        onClick={() => {
+                            installPrompt.prompt();
+                            installPrompt.userChoice.then((choiceResult: any) => {
+                                if (choiceResult.outcome === 'accepted') {
+                                    onInstall?.();
+                                }
+                            });
+                            if (navigator.vibrate) navigator.vibrate(10);
+                        }}
+                        className="w-full py-3 rounded-xl border border-blue-200 dark:border-blue-800/30 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
+                    >
+                        <Download size={14} /> {t.installApp}
+                    </button>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                    <button
+                        onClick={() => {
+                            if ('serviceWorker' in navigator) {
+                                navigator.serviceWorker.getRegistrations().then(registrations => {
+                                    for (let registration of registrations) registration.unregister();
+                                    window.location.reload();
+                                });
+                            } else {
+                                window.location.reload();
+                            }
+                        }}
+                        className="flex items-center justify-center gap-1.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-[10px] transition hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
+                    >
+                        <RefreshCw size={12} /> Force Update
+                    </button>
+
+                    <button onClick={() => { if (confirm(t.resetBtn + '?')) { resetDefaults(); onClose(); } }} className="text-[10px] font-bold text-red-400 hover:text-red-500 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/10 p-3 rounded-xl transition flex items-center justify-center gap-1.5">
+                        <Trash2 size={12} /> {t.resetBtn}
+                    </button>
+                </div>
             </div>
         </div>
     );

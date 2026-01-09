@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useShopStore } from './store/shopStore';
 import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+// Footer removed
 import PlanningView from './components/views/PlanningView';
 import ShoppingView from './components/views/ShoppingView';
 import ListView from './components/views/ListView';
@@ -93,14 +93,17 @@ function App() {
           <>
             <Header openSettings={() => setShowSettings(true)} />
 
-            <main className="pt-20 pb-24 px-4 max-w-2xl mx-auto transition-all duration-500">
+            <main className="pt-20 pb-8 px-4 max-w-2xl mx-auto transition-all duration-500">
               {appMode === 'planning' ? <PlanningView /> : <ShoppingView />}
               <ListView />
             </main>
 
-            <Footer installPrompt={deferredPrompt} onInstall={() => setDeferredPrompt(null)} />
 
-            {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+            {showSettings && <SettingsModal
+              onClose={() => setShowSettings(false)}
+              installPrompt={deferredPrompt}
+              onInstall={() => setDeferredPrompt(null)}
+            />}
           </>
         )}
       </div>
