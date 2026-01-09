@@ -98,7 +98,7 @@ export const useShopStore = create<ShopState>()(
             activeUsers: [],
             sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info', syncHistory: [], lastSync: null, syncVersion: 0 },
             auth: { isLoggedIn: false, email: null, userId: null, username: null },
-            enableUsernames: true,
+            enableUsernames: false,
             sortOrder: 'category',
             showCompletedInline: false,
 
@@ -265,7 +265,7 @@ export const useShopStore = create<ShopState>()(
                 notifyOnAdd: state.notifyOnAdd,
                 notifyOnCheck: state.notifyOnCheck,
                 serverName: state.serverName,
-                enableUsernames: state.enableUsernames,
+                enableUsernames: false,
                 sortOrder: state.sortOrder,
                 showCompletedInline: state.showCompletedInline,
                 // Keep code/recordId for reconnection, but reset connection status

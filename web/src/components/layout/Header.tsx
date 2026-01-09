@@ -15,7 +15,7 @@ const Header = ({ openSettings }: HeaderProps) => {
             <div className="max-w-2xl mx-auto px-4 h-full flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 flex items-center justify-center overflow-hidden p-1.5">
-                        <img src="/pwa-512x512.png" alt="Logo" className="w-full h-full object-contain rounded-lg" />
+                        <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 hidden sm:block">
                         {useShopStore.getState().serverName}

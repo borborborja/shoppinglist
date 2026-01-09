@@ -17,7 +17,7 @@ const AdminSettings = () => {
 
     // Server Config state
     const [serverName, setServerNameState] = useState('');
-    const [enableUsernames, setEnableUsernamesState] = useState(true);
+    const [enableUsernames, setEnableUsernamesState] = useState(false);
     const [srvLoading, setSrvLoading] = useState(false);
     const [srvStatus, setSrvStatus] = useState({ msg: '', type: '' });
 

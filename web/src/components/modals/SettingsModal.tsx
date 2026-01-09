@@ -619,8 +619,8 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
 
     const renderAboutTab = () => (
         <div className="space-y-8 py-4 animate-fade-in flex flex-col items-center text-center">
-            <div className="w-24 h-24 bg-white dark:bg-slate-900 rounded-3xl p-1 flex items-center justify-center shadow-xl animate-pop">
-                <img src="/pwa-192x192.png" alt="Logo" className="w-full h-full object-contain rounded-2xl" />
+            <div className="w-24 h-24 bg-white dark:bg-slate-900 rounded-3xl p-4 flex items-center justify-center shadow-xl animate-pop border border-slate-100 dark:border-slate-800">
+                <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
 
             <div className="space-y-1">
