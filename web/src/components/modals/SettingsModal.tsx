@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw } from 'lucide-react';
+import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles } from '../../data/constants';
 import { pb } from '../../lib/pocketbase';
@@ -202,7 +202,30 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
                         <div className="flex items-center justify-between mb-3 bg-white dark:bg-darkSurface p-2.5 rounded-xl border border-blue-200 dark:border-blue-800/30">
                             <span className="text-xs text-slate-400 uppercase font-bold pl-1">Code:</span>
                             <span className="font-mono font-bold text-blue-600 text-sm tracking-widest select-all">{sync.code}</span>
-                            <button onClick={() => navigator.clipboard.writeText(sync.code!)} className="text-slate-400 hover:text-blue-500 p-1"><Copy size={12} /></button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => {
+                                        const text = encodeURIComponent(`¡Únete a mi lista de la compra en ShopList!\nCódigo: ${sync.code}\nEnlace directo: ${window.location.origin}/?c=${sync.code}`);
+                                        window.open(`https://wa.me/?text=${text}`, '_blank');
+                                    }}
+                                    className="text-slate-400 hover:text-green-500 p-1.5 transition-colors"
+                                    title="WhatsApp"
+                                >
+                                    <MessageCircle size={14} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const text = encodeURIComponent(`ShopList: Lista compartida`);
+                                        const url = encodeURIComponent(`${window.location.origin}/?c=${sync.code}`);
+                                        window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+                                    }}
+                                    className="text-slate-400 hover:text-sky-500 p-1.5 transition-colors"
+                                    title="Telegram"
+                                >
+                                    <Send size={14} />
+                                </button>
+                                <button onClick={() => navigator.clipboard.writeText(sync.code!)} className="text-slate-400 hover:text-blue-500 p-1.5 transition-colors ml-1 border-l border-slate-100 dark:border-slate-800"><Copy size={12} /></button>
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <button onClick={manualSync} disabled={sync.msg === 'Syncing...'} className="flex-1 text-xs font-bold text-blue-500 bg-white dark:bg-darkSurface border border-blue-100 dark:border-blue-800/30 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition disabled:opacity-50">

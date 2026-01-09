@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { pb } from '../../lib/pocketbase';
-import { Trash2, Loader, RefreshCw, CheckSquare, Square, Ghost, Clock, AlertTriangle } from 'lucide-react';
+import { Trash2, Loader, RefreshCw, CheckSquare, Square, Ghost, Clock, AlertTriangle, Send, MessageCircle } from 'lucide-react';
 
 interface ShoppingListRecord {
     id: string;
@@ -187,7 +187,34 @@ const ListsManager = () => {
                                                     <span className="font-mono font-bold text-slate-900 dark:text-slate-100 uppercase leading-none">
                                                         {list.list_code}
                                                     </span>
-                                                    <span className="text-[10px] text-slate-400 font-medium">#{list.id}</span>
+                                                    <div className="flex items-center gap-2 mt-1 px-0.5">
+                                                        <span className="text-[10px] text-slate-400 font-medium">#{list.id}</span>
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const text = encodeURIComponent(`ShopList Code: ${list.list_code}\nLink: ${window.location.origin}/?c=${list.list_code}`);
+                                                                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                                                                }}
+                                                                className="text-slate-400 hover:text-green-500 transition-colors"
+                                                                title="Compartir WhatsApp"
+                                                            >
+                                                                <MessageCircle size={10} />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const text = encodeURIComponent(`ShopList Code: ${list.list_code}`);
+                                                                    const url = encodeURIComponent(`${window.location.origin}/?c=${list.list_code}`);
+                                                                    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+                                                                }}
+                                                                className="text-slate-400 hover:text-sky-500 transition-colors"
+                                                                title="Compartir Telegram"
+                                                            >
+                                                                <Send size={10} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

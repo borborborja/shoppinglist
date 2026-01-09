@@ -96,10 +96,56 @@ function App() {
     };
   }, []);
 
-  // Auto-reconnect if code exists but not connected
+  // Auto-reconnect and URL parameter sync
   useEffect(() => {
-    const autoReconnect = async () => {
+    const handleSyncParam = async () => {
       const { sync, setSyncState, syncFromRemote } = useShopStore.getState();
+
+      // 1. Check for URL parameter
+      const params = new URLSearchParams(window.location.search);
+      const urlCode = (params.get('c') || params.get('code'))?.toUpperCase();
+
+      if (urlCode && urlCode !== sync.code) {
+        if (!navigator.onLine) return;
+
+        const { items, lang } = useShopStore.getState();
+        const hasData = items.length > 0 || sync.connected;
+
+        if (hasData) {
+          const msg = lang === 'ca'
+            ? `Tens una llista activa. Vols descartar-la i connectar-te a la llista compartida (${urlCode})?`
+            : `Tienes una lista activa. ¿Quieres descartarla y conectarte a la lista compartida (${urlCode})?`;
+
+          if (!confirm(msg)) {
+            // User cancelled - clear URL param and stop
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+            return;
+          }
+        }
+
+        setSyncState({ msg: 'Connecting from link...', msgType: 'info' });
+        try {
+          const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${urlCode}"`);
+          const remoteData = record.data || { items: [], categories: undefined };
+
+          // Auto-sync from URL (prioritizing remote if conflict for simplicity in auto-join)
+          syncFromRemote({ items: remoteData.items || [], categories: remoteData.categories || undefined });
+          setSyncState({ connected: true, code: urlCode, recordId: record.id, msg: 'Connected from link', msgType: 'success' });
+          useShopStore.getState().addToSyncHistory(urlCode);
+          localStorage.setItem('shopListSyncCode', urlCode);
+
+          // Clear URL param without reloading
+          const newUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        } catch (e) {
+          console.error('URL Sync failed:', e);
+          setSyncState({ msg: 'Invalid link code', msgType: 'error' });
+        }
+        return;
+      }
+
+      // 2. Standard auto-reconnect
       if (!sync.connected && sync.code) {
         try {
           const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${sync.code}"`);
@@ -110,7 +156,7 @@ function App() {
         }
       }
     };
-    autoReconnect();
+    handleSyncParam();
   }, [sync.code, sync.connected]);
 
   // Sync local changes to remote when items/categories change
