@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.borja.shoplist',
-  appName: 'ShopList',
+  appName: 'ShoppingList',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

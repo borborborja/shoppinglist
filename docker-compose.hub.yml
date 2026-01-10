@@ -1,7 +1,7 @@
 # =============================================================================
-# Docker Compose for ShopList (Using DockerHub Image)
+# Docker Compose for ShoppingList (Using DockerHub Image)
 # =============================================================================
-# This is the recommended way to deploy ShopList.
+# This is the recommended way to deploy ShoppingList.
 # Uses the pre-built image from DockerHub.
 #
 # Usage:
@@ -27,7 +27,7 @@ services:
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}
-      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME:-ShopList}
+      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME:-ShoppingList}
       - SMTP_SENDER_ADDRESS=${SMTP_SENDER_ADDRESS:-noreply@example.com}
 
 volumes:

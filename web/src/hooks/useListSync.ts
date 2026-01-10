@@ -241,7 +241,7 @@ function handleNotifications(localItems: any[], remoteItems: any[], notifyOnAdd:
     }
 
     if (body) {
-        new Notification('ShopList', {
+        new Notification('ShoppingList', {
             body: body.trim(),
             icon: '/icon-192-maskable.png',
             badge: '/icon-192-maskable.png',

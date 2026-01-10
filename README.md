@@ -1,12 +1,12 @@
-# <img src="web/public/icon.png" width="48" height="48" valign="middle"> ShopList
+# <img src="web/public/icon.png" width="48" height="48" valign="middle"> ShoppingList
 
 A modern, self-hosted shopping list application with real-time synchronization.
 
 **Tech Stack:** Go (PocketBase) + React (Vite, TypeScript, TailwindCSS v4) + Docker
 
-![ShopList Logo](web/public/icon.png)
+![ShoppingList Logo](web/public/icon.png)
 
-![ShopList Screenshot](./docs/screenshot.png)
+![ShoppingList Screenshot](./docs/screenshot.png)
 
 ---
 
@@ -14,7 +14,7 @@ A modern, self-hosted shopping list application with real-time synchronization.
 
 ### Using Docker Hub (Recommended)
 
-The easiest way to run ShopList is using the pre-built image from Docker Hub.
+The easiest way to run ShoppingList is using the pre-built image from Docker Hub.
 
 ```bash
 # Download the hub compose file
@@ -76,7 +76,7 @@ You can change these via the `/admin` settings tab:
 | `SMTP_PORT` | SMTP port | `587` |
 | `SMTP_USER` | SMTP username | - |
 | `SMTP_PASSWORD` | SMTP password | - |
-| `SMTP_SENDER_NAME` | Email sender name | `ShopList` |
+| `SMTP_SENDER_NAME` | Email sender name | `ShoppingList` |
 | `SMTP_SENDER_ADDRESS` | Email sender address | `noreply@example.com` |
 
 ### Email Verification
