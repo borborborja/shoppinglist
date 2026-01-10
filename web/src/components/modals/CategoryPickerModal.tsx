@@ -4,6 +4,7 @@ import { X, Check, Plus } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles } from '../../data/constants';
 import AddCategoryModal from './AddCategoryModal';
+import { useBackButton } from '../../hooks/useBackButton';
 
 interface CategoryPickerModalProps {
     productName: string;
@@ -14,6 +15,8 @@ interface CategoryPickerModalProps {
 const CategoryPickerModal = ({ productName, onClose, onConfirm }: CategoryPickerModalProps) => {
     const { categories, lang } = useShopStore();
     const t = translations[lang];
+
+    useBackButton(onClose);
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [addToCatalog, setAddToCatalog] = useState(false);

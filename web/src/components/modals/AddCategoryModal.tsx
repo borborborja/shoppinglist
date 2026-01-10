@@ -4,6 +4,7 @@ import { X, Check } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, EMOJI_LIST } from '../../data/constants';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { useBackButton } from '../../hooks/useBackButton';
 
 interface AddCategoryModalProps {
     onClose: () => void;
@@ -14,6 +15,7 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
     const t = translations[lang];
 
     useScrollLock(true);
+    useBackButton(onClose);
 
     const [name, setName] = useState('');
     const [icon, setIcon] = useState('📦');

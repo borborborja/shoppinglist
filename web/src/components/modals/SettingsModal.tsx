@@ -8,6 +8,7 @@ import { getLocalizedItemName } from '../../utils/helpers';
 import { triggerHaptic } from '../../utils/haptics';
 import type { LocalizedItem, SettingsTab } from '../../types';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { useBackButton } from '../../hooks/useBackButton';
 
 interface SettingsModalProps {
     onClose: () => void;
@@ -26,7 +27,9 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     } = useShopStore();
     const t = translations[lang];
 
+
     useScrollLock(true);
+    useBackButton(onClose);
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('account');
     const [settingsActiveCat, setSettingsActiveCat] = useState<string>('fruit');
