@@ -66,8 +66,13 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                     setConnectionStatus({ msg: 'Acceso remoto deshabilitado en el servidor', type: 'error' });
                     return;
                 }
-            } catch {
-                // If we can't read config, assume it's ok (older server version)
+            } catch (e: any) {
+                // If the error is 403 or 401, it's a real access issue we should report
+                if (e.status === 403 || e.status === 401 || (e.status === 0 && e.message.includes('fetch'))) {
+                    throw e;
+                }
+                // For other errors (like 404 cat not found), we assume it's an old server
+                console.warn('Could not verify remote access config:', e);
             }
 
             // Success - save URL

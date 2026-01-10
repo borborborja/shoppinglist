@@ -114,6 +114,9 @@ func main() {
 						if c.Request().Method == "OPTIONS" {
 							return c.NoContent(204)
 						}
+					} else {
+						// Explicitly block mobile origins if remote access is disabled
+						return echo.NewHTTPError(403, "Remote access disabled from this server")
 					}
 				}
 				return next(c)
