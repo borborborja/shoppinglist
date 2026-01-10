@@ -303,6 +303,8 @@ export const useShopStore = create<ShopState>()(
                 notifyOnAdd: state.notifyOnAdd,
                 notifyOnCheck: state.notifyOnCheck,
                 serverName: state.serverName,
+                // Persist serverUrl for native apps custom server config
+                serverUrl: state.serverUrl,
                 enableUsernames: false,
                 sortOrder: state.sortOrder,
                 showCompletedInline: state.showCompletedInline,

@@ -145,17 +145,20 @@ export function useListSync() {
                             processedIds.add(localItem.id);
                         } else {
                             // Local item NOT in remote.
-                            // This usually means it was deleted remotely.
-                            // Ideally we should track deletions, but for now we accept the deletion
-                            // UNLESS it was created very recently locally (optimistic add in flight) which is handled by ignoring early re-echoes?
-                            // No, to fix "ghost unchecking" we trust the MERGE of existing items.
-                            // For deletions, we trust the server list.
-                            // So if it's not in remote, it's GONE.
-                            // EXCEPTION: If we just added it and server hasn't seen it yet.
-                            // But since we syncToRemote actively, chances are low.
-                            // Simpler approach: If it's not in remote, we keep it ONLY if it's new (created locally > lastSync).
-                            // But complex. Let's stick to "Server Authority for List Membership" for now.
-                            // If it's not in remote, it's deleted.
+                            // FIX: Only delete if the item is older than our last sync.
+                            // If it's newer, it means it's a pending local creation that hasn't reached the server yet.
+                            const localTime = localItem.updatedAt || 0;
+                            // We use a small buffer (e.g. 1000ms) or just raw comparison depending on confidence.
+                            // If lastSync is null/0, we act conservatively and keep the item.
+                            const lastSyncTime = useShopStore.getState().sync.lastSync || 0;
+
+                            if (localTime > lastSyncTime) {
+                                // Keep it, it's a new local (or recently updated) item pending push
+                                mergedItems.push(localItem);
+                                processedIds.add(localItem.id);
+                            } else {
+                                // It's old enough to have been known by server, and server doesn't have it -> Accepted deletion
+                            }
                         }
                     }
 

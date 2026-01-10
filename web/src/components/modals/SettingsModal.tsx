@@ -45,7 +45,11 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     // Server URL State (for native apps)
     const { serverUrl, setServerUrl } = useShopStore();
     const [tempServerUrl, setTempServerUrl] = useState(serverUrl || '');
-    const [connectionStatus, setConnectionStatus] = useState<{ msg: string; type: 'success' | 'error' | 'loading' | '' }>({ msg: '', type: '' });
+    // Initialize status as success if we already have a saved URL, so UI shows connected state
+    const [connectionStatus, setConnectionStatus] = useState<{ msg: string; type: 'success' | 'error' | 'loading' | '' }>({
+        msg: serverUrl ? 'Conectado' : '',
+        type: serverUrl ? 'success' : ''
+    });
 
     // Easter Egg State
     const [showDedication, setShowDedication] = useState(false);

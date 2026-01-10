@@ -192,20 +192,24 @@ const ListView = () => {
                     )}
                 </div>
                 {appMode === 'planning' && (
-                    <div className="flex items-center pr-1 h-full">
+                    <div className="flex items-center pr-1 h-full gap-2 pl-2">
                         {!item.checked && (
                             <button
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
                                 onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
-                                className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition mr-1"
+                                className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition"
                             >
-                                <Pen size={14} />
+                                <Pen size={16} />
                             </button>
                         )}
                         <button
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
                             onClick={(e) => handleDelete(item.id, e)}
-                            className={`w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition ${item.checked ? '' : 'mr-1'}`}
+                            className={`w-9 h-9 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition`}
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={18} />
                         </button>
                     </div>
                 )}
