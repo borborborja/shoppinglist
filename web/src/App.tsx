@@ -38,7 +38,24 @@ function App() {
 
   // --- Global Lifecycle & updates ---
   useEffect(() => {
+    // Restore connection if configured for native
+    if (import.meta.env.VITE_PLATFORM !== 'web') { // Optimization: check env first if possible, or use isNativePlatform helper
+      // We use the helper from lib/pocketbase inside the effect
+    }
+
+    // Initialize Catalog
     useShopStore.getState().loadCatalog();
+
+    // Re-connect to custom server if needed (Native)
+    const { serverUrl } = useShopStore.getState();
+    if (serverUrl) {
+      // Dynamic import or direct usage if imported at top
+      import('./lib/pocketbase').then(({ reinitializePocketBase, isNativePlatform }) => {
+        if (isNativePlatform()) {
+          reinitializePocketBase(serverUrl);
+        }
+      });
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();

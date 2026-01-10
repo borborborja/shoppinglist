@@ -132,6 +132,8 @@ const ListView = () => {
                     // Prevent context menu on long press devices usually
                     startPress();
                 }}
+                onTouchMove={endPress} // Cancel press if scrolling
+                onTouchCancel={endPress}
                 onTouchEnd={endPress}
                 onClick={handleOnClick}
                 className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] select-none ${getItemClass()} ${item.checked

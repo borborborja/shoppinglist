@@ -121,11 +121,11 @@ export function useListSync() {
                     if (remoteStateStr === lastRemoteStateRef.current) return;
 
                     // Optimistic UI Protection:
-                    // If the user interacted locally in the last 500ms, ignore this remote update.
+                    // If the user interacted locally in the last 2000ms (mobile latency), ignore this remote update.
                     // This prevents the "revert" flicker when the server echoes back an old state
                     // right after we made a change but before our change propagatedfully.
                     const { lastLocalInteraction } = useShopStore.getState().sync;
-                    if (Date.now() - lastLocalInteraction < 500) {
+                    if (Date.now() - lastLocalInteraction < 2000) {
                         return; // Ignore this update, our local state is newer
                     }
 
