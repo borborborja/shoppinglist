@@ -379,59 +379,38 @@ const ListView = () => {
                         )}
                     </div>
                 </div>
+            </div>
 
-                {/* Empty State */}
-                {items.length === 0 && (
-                    <div className="text-center py-16 flex flex-col items-center justify-center opacity-50">
-                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                            <ShoppingBasket size={32} className="text-slate-300 dark:text-slate-600" />
-                        </div>
-                        <p className="text-sm text-slate-400 font-bold tracking-wide">{t.empty}</p>
+            {/* Empty State */}
+            {items.length === 0 && (
+                <div className="text-center py-16 flex flex-col items-center justify-center opacity-50">
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                        <ShoppingBasket size={32} className="text-slate-300 dark:text-slate-600" />
                     </div>
-                )}
+                    <p className="text-sm text-slate-400 font-bold tracking-wide">{t.empty}</p>
+                </div>
+            )}
 
-                {/* Combined List Rendering based on showCompletedInline */}
-                <div className="flex flex-col">
-                    {/* Items Section */}
-                    {sortOrder === 'category' ? (
-                        Object.entries(itemsGrouped).map(([key, groupItems]) => {
-                            const catDef = categories[key] || defaultCategories['other'];
-                            const style = categoryStyles[key] || categoryStyles['other'];
+            {/* Combined List Rendering based on showCompletedInline */}
+            <div className="flex flex-col">
+                {/* Items Section */}
+                {sortOrder === 'category' ? (
+                    Object.entries(itemsGrouped).map(([key, groupItems]) => {
+                        const catDef = categories[key] || defaultCategories['other'];
+                        const style = categoryStyles[key] || categoryStyles['other'];
 
-                            return (
-                                <div key={key} className="mb-2 animate-slide-up">
-                                    <div className="flex items-center gap-2 mb-2 pl-1">
-                                        <span className="text-lg">{catDef.icon}</span>
-                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                            {t.cats[key as keyof typeof t.cats] || key}
-                                        </h3>
-                                        <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
-                                    </div>
-                                    <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                                        {groupItems.map(item => (
-                                            <ItemCard
-                                                key={item.id}
-                                                item={item}
-                                                style={style}
-                                                viewMode={viewMode}
-                                                appMode={appMode}
-                                                toggleCheck={toggleCheck}
-                                                setEditingItem={setEditingItem}
-                                                handleDelete={handleDelete}
-                                                getItemClass={getItemClass}
-                                            />
-                                        ))}
-                                    </div>
+                        return (
+                            <div key={key} className="mb-2 animate-slide-up">
+                                <div className="flex items-center gap-2 mb-2 pl-1">
+                                    <span className="text-lg">{catDef.icon}</span>
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                        {t.cats[key as keyof typeof t.cats] || key}
+                                    </h3>
+                                    <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
                                 </div>
-                            );
-                        })
-                    ) : (
-                        itemsSorted.length > 0 && (
-                            <div className="mb-2 animate-slide-up">
                                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                                    {itemsSorted.map(item => {
-                                        const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
-                                        return <ItemCard
+                                    {groupItems.map(item => (
+                                        <ItemCard
                                             key={item.id}
                                             item={item}
                                             style={style}
@@ -441,37 +420,59 @@ const ListView = () => {
                                             setEditingItem={setEditingItem}
                                             handleDelete={handleDelete}
                                             getItemClass={getItemClass}
-                                        />;
-                                    })}
+                                        />
+                                    ))}
                                 </div>
                             </div>
-                        )
-                    )}
-
-                    <CompletedSection />
-                </div>
-
-                {/* Active Users */}
-                {sync.connected && activeUsers.length > 0 && (
-                    <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
-                        <div className="flex flex-wrap items-center justify-center gap-2">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Viendo ahora:</span>
-                            {activeUsers.map(user => (
-                                <div key={user.id} className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700 animate-pulse-slow">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
-                                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{user.username}</span>
-                                </div>
-                            ))}
+                        );
+                    })
+                ) : (
+                    itemsSorted.length > 0 && (
+                        <div className="mb-2 animate-slide-up">
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                                {itemsSorted.map(item => {
+                                    const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
+                                    return <ItemCard
+                                        key={item.id}
+                                        item={item}
+                                        style={style}
+                                        viewMode={viewMode}
+                                        appMode={appMode}
+                                        toggleCheck={toggleCheck}
+                                        setEditingItem={setEditingItem}
+                                        handleDelete={handleDelete}
+                                        getItemClass={getItemClass}
+                                    />;
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    )
                 )}
 
-                {/* Editing Product Modal */}
-                {editingItem && (
-                    <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
-                )}
+                <CompletedSection />
             </div>
-            );
+
+            {/* Active Users */}
+            {sync.connected && activeUsers.length > 0 && (
+                <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Viendo ahora:</span>
+                        {activeUsers.map(user => (
+                            <div key={user.id} className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700 animate-pulse-slow">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
+                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{user.username}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Editing Product Modal */}
+            {editingItem && (
+                <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
+            )}
+        </div>
+    );
 };
 
-            export default ListView;
+export default ListView;
