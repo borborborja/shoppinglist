@@ -256,155 +256,182 @@ const ListView = () => {
     return (
         <div className="relative">
             {/* List Header */}
-            <div className="flex justify-between items-center mb-4 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-md relative">
-                {/* Decorative background circle */}
-                <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-
-                <div className="flex items-center gap-2 relative z-10 w-full overflow-hidden rounded-l-xl">
-                    {isRenaming ? (
-                        <input
-                            ref={renameInputRef}
-                            type="text"
-                            defaultValue={listName || ''}
-                            placeholder={t.myList}
-                            onBlur={handleRenameSubmit}
-                            onKeyDown={handleRenameKeyDown}
-                            className="text-xl font-bold tracking-tight bg-transparent border-b-2 border-white/50 focus:border-white focus:outline-none text-white w-full max-w-[200px] placeholder-white/50"
-                        />
-                    ) : (
-                        <h2
-                            onMouseDown={() => {
-                                if (appMode === 'planning') {
-                                    setIsRenaming(true);
-                                    triggerHaptic(50);
-                                }
-                            }}
-                            className={`text-xl font-bold tracking-tight transition-colors truncate max-w-[240px] text-white ${appMode === 'planning' ? 'cursor-text select-none active:opacity-80' : ''}`}
-                        >
-                            {listName || t.myList}
-                        </h2>
-                    )}
-                    {sync.connected && (
-                        <div className="flex items-center justify-center w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)] border border-white/20"></div>
-                    )}
+            <div className="relative mb-4 rounded-xl shadow-md">
+                {/* Background Layer with Overflow Hidden (for gradient & decoration) */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl overflow-hidden pointer-events-none">
+                    <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
                 </div>
-                <div className="flex gap-1.5 relative z-10">
-                    {/* View Switcher (Back outside) */}
-                    <button
-                        onClick={cycleViewMode}
-                        className="flex items-center justify-center w-8 h-8 text-white bg-white/20 backdrop-blur-sm border border-white/10 rounded-lg transition shadow-sm hover:bg-white/30 active:scale-95"
-                    >
-                        {getModeIcon()}
-                    </button>
 
-                    {/* View Options Menu Trigger */}
-                    <div ref={optionsRef}>
+                {/* Content Layer (No overflow hidden, allows menu popout) */}
+                <div className="relative z-10 flex justify-between items-center px-3 py-2">
+
+                    <div className="flex items-center gap-2 w-full overflow-hidden rounded-l-xl">
+                        {isRenaming ? (
+                            <input
+                                ref={renameInputRef}
+                                type="text"
+                                defaultValue={listName || ''}
+                                placeholder={t.myList}
+                                onBlur={handleRenameSubmit}
+                                onKeyDown={handleRenameKeyDown}
+                                className="text-xl font-bold tracking-tight bg-transparent border-b-2 border-white/50 focus:border-white focus:outline-none text-white w-full max-w-[200px] placeholder-white/50"
+                            />
+                        ) : (
+                            <h2
+                                onMouseDown={() => {
+                                    if (appMode === 'planning') {
+                                        setIsRenaming(true);
+                                        triggerHaptic(50);
+                                    }
+                                }}
+                                className={`text-xl font-bold tracking-tight transition-colors truncate max-w-[240px] text-white ${appMode === 'planning' ? 'cursor-text select-none active:opacity-80' : ''}`}
+                            >
+                                {listName || t.myList}
+                            </h2>
+                        )}
+                        {sync.connected && (
+                            <div className="flex items-center justify-center w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)] border border-white/20"></div>
+                        )}
+                    </div>
+                    <div className="flex gap-1.5">
+                        {/* View Switcher (Back outside) */}
                         <button
-                            onClick={() => { setShowOptions(!showOptions); triggerHaptic(10); }}
-                            className={`flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm border border-white/10 rounded-lg transition shadow-sm hover:bg-white/30 active:scale-95 ${showOptions ? 'ring-2 ring-white/30 bg-white/30' : 'text-white'}`}
-                            title={t.viewOptions}
+                            onClick={cycleViewMode}
+                            className="flex items-center justify-center w-8 h-8 text-white bg-white/20 backdrop-blur-sm border border-white/10 rounded-lg transition shadow-sm hover:bg-white/30 active:scale-95"
                         >
-                            <MoreHorizontal size={18} className="text-white" />
+                            {getModeIcon()}
                         </button>
 
-                        {/* Discreet Options Menu */}
-                        {showOptions && (
-                            <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 z-50 animate-pop overflow-hidden">
-                                <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 dark:border-slate-800/50 mb-1">
-                                    {t.viewOptions}
-                                </div>
+                        {/* View Options Menu Trigger */}
+                        <div ref={optionsRef}>
+                            <button
+                                onClick={() => { setShowOptions(!showOptions); triggerHaptic(10); }}
+                                className={`flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm border border-white/10 rounded-lg transition shadow-sm hover:bg-white/30 active:scale-95 ${showOptions ? 'ring-2 ring-white/30 bg-white/30' : 'text-white'}`}
+                                title={t.viewOptions}
+                            >
+                                <MoreHorizontal size={18} className="text-white" />
+                            </button>
 
-                                {/* Rename List Option */}
-                                {appMode === 'planning' && (
+                            {/* Discreet Options Menu */}
+                            {showOptions && (
+                                <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 z-50 animate-pop overflow-hidden">
+                                    <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 dark:border-slate-800/50 mb-1">
+                                        {t.viewOptions}
+                                    </div>
+
+                                    {/* Rename List Option */}
+                                    {appMode === 'planning' && (
+                                        <button
+                                            onClick={() => { setIsRenaming(true); setShowOptions(false); triggerHaptic(10); }}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600">
+                                                <Pen size={16} />
+                                            </div>
+                                            <div className="text-left leading-tight">
+                                                <div className="text-xs font-bold uppercase tracking-wide">
+                                                    Renombrar Lista
+                                                </div>
+                                            </div>
+                                        </button>
+                                    )}
+
+                                    {/* Sort Mode */}
                                     <button
-                                        onClick={() => { setIsRenaming(true); setShowOptions(false); triggerHaptic(10); }}
+                                        onClick={() => { setSortOrder(sortOrder === 'category' ? 'alpha' : 'category'); setShowOptions(false); triggerHaptic(10); }}
                                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600">
-                                            <Pen size={16} />
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${sortOrder === 'alpha' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                            <Filter size={16} />
                                         </div>
                                         <div className="text-left leading-tight">
                                             <div className="text-xs font-bold uppercase tracking-wide">
-                                                Renombrar Lista
+                                                {sortOrder === 'alpha' ? 'Agrupar: Categoría' : 'Agrupar: Alfabético'}
                                             </div>
                                         </div>
                                     </button>
-                                )}
 
-                                {/* Sort Mode */}
-                                <button
-                                    onClick={() => { setSortOrder(sortOrder === 'category' ? 'alpha' : 'category'); setShowOptions(false); triggerHaptic(10); }}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
-                                >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${sortOrder === 'alpha' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                                        <Filter size={16} />
-                                    </div>
-                                    <div className="text-left leading-tight">
-                                        <div className="text-xs font-bold uppercase tracking-wide">
-                                            {sortOrder === 'alpha' ? 'Agrupar: Categoría' : 'Agrupar: Alfabético'}
+                                    {/* Inline Completed */}
+                                    <button
+                                        onClick={() => { setShowCompletedInline(!showCompletedInline); setShowOptions(false); triggerHaptic(10); }}
+                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
+                                    >
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${showCompletedInline ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                            <Check size={16} />
                                         </div>
-                                    </div>
-                                </button>
+                                        <div className="text-left leading-tight">
+                                            <div className="text-xs font-bold uppercase tracking-wide">
+                                                {t.inlineComp}
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
-                                {/* Inline Completed */}
-                                <button
-                                    onClick={() => { setShowCompletedInline(!showCompletedInline); setShowOptions(false); triggerHaptic(10); }}
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition group"
-                                >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${showCompletedInline ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                                        <Check size={16} />
-                                    </div>
-                                    <div className="text-left leading-tight">
-                                        <div className="text-xs font-bold uppercase tracking-wide">
-                                            {t.inlineComp}
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
+                        {completedItems.length > 0 && showCompletedInline && (
+                            <button
+                                onClick={() => { if (confirm(t.clearComp + '?')) { clearCompleted(); triggerHaptic(20); } }}
+                                className="text-[10px] font-bold text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 px-3 py-1.5 rounded-lg transition uppercase tracking-wider bg-white dark:bg-slate-800 border border-transparent hover:border-red-100"
+                            >
+                                {t.clearComp}
+                            </button>
                         )}
                     </div>
-
-                    {completedItems.length > 0 && showCompletedInline && (
-                        <button
-                            onClick={() => { if (confirm(t.clearComp + '?')) { clearCompleted(); triggerHaptic(20); } }}
-                            className="text-[10px] font-bold text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 px-3 py-1.5 rounded-lg transition uppercase tracking-wider bg-white dark:bg-slate-800 border border-transparent hover:border-red-100"
-                        >
-                            {t.clearComp}
-                        </button>
-                    )}
                 </div>
-            </div>
 
-            {/* Empty State */}
-            {items.length === 0 && (
-                <div className="text-center py-16 flex flex-col items-center justify-center opacity-50">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                        <ShoppingBasket size={32} className="text-slate-300 dark:text-slate-600" />
+                {/* Empty State */}
+                {items.length === 0 && (
+                    <div className="text-center py-16 flex flex-col items-center justify-center opacity-50">
+                        <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                            <ShoppingBasket size={32} className="text-slate-300 dark:text-slate-600" />
+                        </div>
+                        <p className="text-sm text-slate-400 font-bold tracking-wide">{t.empty}</p>
                     </div>
-                    <p className="text-sm text-slate-400 font-bold tracking-wide">{t.empty}</p>
-                </div>
-            )}
+                )}
 
-            {/* Combined List Rendering based on showCompletedInline */}
-            <div className="flex flex-col">
-                {/* Items Section */}
-                {sortOrder === 'category' ? (
-                    Object.entries(itemsGrouped).map(([key, groupItems]) => {
-                        const catDef = categories[key] || defaultCategories['other'];
-                        const style = categoryStyles[key] || categoryStyles['other'];
+                {/* Combined List Rendering based on showCompletedInline */}
+                <div className="flex flex-col">
+                    {/* Items Section */}
+                    {sortOrder === 'category' ? (
+                        Object.entries(itemsGrouped).map(([key, groupItems]) => {
+                            const catDef = categories[key] || defaultCategories['other'];
+                            const style = categoryStyles[key] || categoryStyles['other'];
 
-                        return (
-                            <div key={key} className="mb-2 animate-slide-up">
-                                <div className="flex items-center gap-2 mb-2 pl-1">
-                                    <span className="text-lg">{catDef.icon}</span>
-                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                        {t.cats[key as keyof typeof t.cats] || key}
-                                    </h3>
-                                    <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
+                            return (
+                                <div key={key} className="mb-2 animate-slide-up">
+                                    <div className="flex items-center gap-2 mb-2 pl-1">
+                                        <span className="text-lg">{catDef.icon}</span>
+                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                            {t.cats[key as keyof typeof t.cats] || key}
+                                        </h3>
+                                        <span className="text-[10px] font-bold text-slate-300 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 px-1.5 rounded-md ml-auto">{groupItems.length}</span>
+                                    </div>
+                                    <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                                        {groupItems.map(item => (
+                                            <ItemCard
+                                                key={item.id}
+                                                item={item}
+                                                style={style}
+                                                viewMode={viewMode}
+                                                appMode={appMode}
+                                                toggleCheck={toggleCheck}
+                                                setEditingItem={setEditingItem}
+                                                handleDelete={handleDelete}
+                                                getItemClass={getItemClass}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
+                            );
+                        })
+                    ) : (
+                        itemsSorted.length > 0 && (
+                            <div className="mb-2 animate-slide-up">
                                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                                    {groupItems.map(item => (
-                                        <ItemCard
+                                    {itemsSorted.map(item => {
+                                        const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
+                                        return <ItemCard
                                             key={item.id}
                                             item={item}
                                             style={style}
@@ -414,59 +441,37 @@ const ListView = () => {
                                             setEditingItem={setEditingItem}
                                             handleDelete={handleDelete}
                                             getItemClass={getItemClass}
-                                        />
-                                    ))}
+                                        />;
+                                    })}
                                 </div>
                             </div>
-                        );
-                    })
-                ) : (
-                    itemsSorted.length > 0 && (
-                        <div className="mb-2 animate-slide-up">
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-                                {itemsSorted.map(item => {
-                                    const style = categoryStyles[item.category || 'other'] || categoryStyles['other'];
-                                    return <ItemCard
-                                        key={item.id}
-                                        item={item}
-                                        style={style}
-                                        viewMode={viewMode}
-                                        appMode={appMode}
-                                        toggleCheck={toggleCheck}
-                                        setEditingItem={setEditingItem}
-                                        handleDelete={handleDelete}
-                                        getItemClass={getItemClass}
-                                    />;
-                                })}
-                            </div>
+                        )
+                    )}
+
+                    <CompletedSection />
+                </div>
+
+                {/* Active Users */}
+                {sync.connected && activeUsers.length > 0 && (
+                    <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Viendo ahora:</span>
+                            {activeUsers.map(user => (
+                                <div key={user.id} className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700 animate-pulse-slow">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
+                                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{user.username}</span>
+                                </div>
+                            ))}
                         </div>
-                    )
+                    </div>
                 )}
 
-                <CompletedSection />
+                {/* Editing Product Modal */}
+                {editingItem && (
+                    <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
+                )}
             </div>
-
-            {/* Active Users */}
-            {sync.connected && activeUsers.length > 0 && (
-                <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1">Viendo ahora:</span>
-                        {activeUsers.map(user => (
-                            <div key={user.id} className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-700 animate-pulse-slow">
-                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
-                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{user.username}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Editing Product Modal */}
-            {editingItem && (
-                <ProductModal item={editingItem} onClose={() => setEditingItem(null)} />
-            )}
-        </div>
-    );
+            );
 };
 
-export default ListView;
+            export default ListView;
