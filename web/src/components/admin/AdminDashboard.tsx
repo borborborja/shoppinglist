@@ -79,7 +79,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     );
 
     const renderTabs = () => (
-        <div className="flex gap-1 px-6 pt-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-16 z-40">
+        <div className="flex gap-1 px-6 pt-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-16 z-40 overflow-x-auto scrollbar-hide">
             <button
                 onClick={() => setActiveTab('lists')}
                 className={`px-4 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'lists'
@@ -135,17 +135,19 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={24} />
             <div className="flex-1">
                 <p className="text-red-800 dark:text-red-200 font-bold text-sm">
-                    ¡Contraseña por defecto detectada!
+                    {t.passwordWarningTitle}
                 </p>
                 <p className="text-red-600 dark:text-red-300 text-xs">
-                    Por seguridad, cambia la contraseña en la pestaña de <strong>Ajustes</strong>.
+                    {t.passwordWarningBody.split('Settings').map((part: string, i: number) =>
+                        i === 0 ? <span key={i}>{part}<strong>{t.settings}</strong></span> : <span key={i}>{part}</span>
+                    )}
                 </p>
             </div>
             <button
                 onClick={() => setActiveTab('settings')}
-                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors"
+                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors whitespace-nowrap"
             >
-                Ir a Ajustes
+                {t.goToSettings}
             </button>
         </div>
     );

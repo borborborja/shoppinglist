@@ -157,8 +157,8 @@ const AddItemInput = () => {
         <>
             <div className="mb-6 relative group z-20">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
-                <div className="relative flex shadow-xl shadow-indigo-500/5 rounded-2xl overflow-hidden bg-white dark:bg-darkSurface transition-colors ring-1 ring-slate-900/5 dark:ring-white/10">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <div className="relative flex shadow-lg shadow-indigo-500/5 rounded-xl overflow-hidden bg-white dark:bg-darkSurface transition-colors ring-1 ring-slate-900/5 dark:ring-white/10 h-[52px]">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                         <Search size={18} />
                     </div>
                     <input
@@ -168,16 +168,15 @@ const AddItemInput = () => {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         onFocus={() => val.length >= 2 && setShowSuggestions(true)}
-                        className="flex-grow p-3 sm:p-4 pl-10 sm:pl-11 bg-transparent focus:outline-none dark:text-white placeholder-slate-400 text-base sm:text-lg font-medium"
+                        className="flex-grow py-2 pl-10 pr-4 bg-transparent focus:outline-none dark:text-white placeholder-slate-400 text-lg font-medium h-full"
                         placeholder={t.placeholder}
                         autoComplete="off"
                     />
                     <button
                         onClick={handleSubmit}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 font-bold transition flex items-center justify-center border-l border-slate-100 dark:border-slate-700 w-14 sm:w-auto"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 font-bold transition flex items-center justify-center border-l border-slate-100 dark:border-slate-700 w-12 h-full"
                     >
-                        <Plus size={20} className="sm:hidden" />
-                        <Plus size={24} className="hidden sm:block" />
+                        <Plus size={20} />
                     </button>
                 </div>
 

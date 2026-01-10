@@ -20,7 +20,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         lang, setLang, theme, setTheme,
         notifyOnAdd, notifyOnCheck, setNotifyOnAdd, setNotifyOnCheck,
         categories, addCategoryItem, removeCategoryItem, addCategory, removeCategory,
-        items, resetDefaults, importData,
+        items, resetDefaults, importData, listName,
         sync, setSyncState, syncFromRemote, addToSyncHistory,
         auth, setUsername
     } = useShopStore();
@@ -127,7 +127,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
 
 
     // Pending sync record for merge/replace dialog
-    const [pendingSyncRecord, setPendingSyncRecord] = useState<{ id: string; code: string; data: { items: any[]; categories: any } } | null>(null);
+    const [pendingSyncRecord, setPendingSyncRecord] = useState<{ id: string; code: string; data: { items: any[]; categories: any; listName?: string } } | null>(null);
 
     // --- Sync Logic ---
     const connectSync = async (code: string) => {
@@ -144,7 +144,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
             }
 
             // If no conflict, just sync (if remote has data, use it; otherwise keep local)
-            finishConnection(record.id, code, remoteData.items.length > 0 ? remoteData : { items, categories });
+            finishConnection(record.id, code, remoteData.items.length > 0 ? remoteData : { items, categories, listName: listName || undefined });
         } catch { disconnectSync(); setSyncState({ msg: 'Code not found', msgType: 'error' }); }
     };
 
@@ -157,22 +157,23 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
             finishConnection(id, code, data);
         } else {
             // Merge: combine items (avoid duplicates by id)
+            // Merge: combine items (avoid duplicates by id)
             const remoteItems = data.items || [];
             const localItemIds = new Set(items.map((i: any) => i.id));
             const mergedItems = [...items, ...remoteItems.filter((i: any) => !localItemIds.has(i.id))];
-            finishConnection(id, code, { items: mergedItems, categories: data.categories || categories });
+            finishConnection(id, code, { items: mergedItems, categories: data.categories || categories, listName: data.listName || listName });
         }
         setPendingSyncRecord(null);
     };
 
-    const finishConnection = (recordId: string, code: string, data: { items: any[]; categories: any }) => {
-        syncFromRemote({ items: data.items || [], categories: data.categories || undefined });
+    const finishConnection = (recordId: string, code: string, data: { items: any[]; categories: any; listName?: string | null }) => {
+        syncFromRemote({ items: data.items || [], categories: data.categories || undefined, listName: data.listName });
         setSyncState({ connected: true, code, recordId, msg: 'Connected', msgType: 'success' });
         addToSyncHistory(code);
         localStorage.setItem('shopListSyncCode', code);
 
         // Push merged/synced data to remote
-        pb.collection('shopping_lists').update(recordId, { data: { items: data.items, categories: data.categories } }).catch(console.error);
+        pb.collection('shopping_lists').update(recordId, { data: { items: data.items, categories: data.categories, listName: data.listName } }).catch(console.error);
 
         // Subscribe to updates - wrap in try/catch to avoid errors during subscription
         try {
@@ -193,7 +194,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         // Step 1: Create the list
         let record;
         try {
-            record = await pb.collection('shopping_lists').create({ list_code: newCode, data: { items, categories } });
+            record = await pb.collection('shopping_lists').create({ list_code: newCode, data: { items, categories, listName } });
         } catch (err: any) {
             console.error('Error creating list:', err);
             const msg = err?.response?.message || err?.data?.message || err?.message || 'Unknown error';
@@ -202,8 +203,9 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         }
 
         // Step 2: Finish connection (this should not throw to user)
+        // Step 2: Finish connection (this should not throw to user)
         try {
-            finishConnection(record.id, newCode, { items, categories });
+            finishConnection(record.id, newCode, { items, categories, listName });
         } catch (err) {
             console.error('Error in finishConnection:', err);
             // Still show success since list was created
@@ -221,7 +223,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         setSyncState({ msg: 'Syncing...', msgType: 'info' });
         try {
             // Push local
-            await pb.collection('shopping_lists').update(sync.recordId, { data: { items, categories } });
+            await pb.collection('shopping_lists').update(sync.recordId, { data: { items, categories, listName } });
             // Pull remote
             const record = await pb.collection('shopping_lists').getOne(sync.recordId);
             if (record.data) syncFromRemote(record.data);
@@ -254,7 +256,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
 
     // --- Data Logic ---
     const exportData = () => {
-        const blob = new Blob([JSON.stringify({ items, categories })], { type: "application/json" });
+        const blob = new Blob([JSON.stringify({ items, categories, listName })], { type: "application/json" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `ShopList_Backup_${new Date().toISOString().slice(0, 10)}.json`;
@@ -267,7 +269,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         reader.onload = (ev) => {
             try {
                 const data = JSON.parse(ev.target?.result as string);
-                if (confirm(t.resetBtn + '?')) { importData(data.items || data, data.categories); onClose(); }
+                if (confirm(t.resetBtn + '?')) { importData(data.items || data, data.categories, data.listName); onClose(); }
             } catch { alert('Error reading file'); }
         };
         reader.readAsText(file);
@@ -832,40 +834,44 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="relative w-11/12 max-w-md bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 animate-pop overflow-y-auto max-h-[90vh] ring-1 ring-white/10">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-4">
+            <div className="relative w-full max-w-md mx-4 bg-white dark:bg-darkSurface rounded-2xl shadow-2xl flex flex-col h-[85vh] sm:h-[600px] animate-pop ring-1 ring-white/10 overflow-hidden">
+                {/* Header - Fixed */}
+                <div className="flex justify-between items-center p-6 pb-4 shrink-0 z-10 bg-white dark:bg-darkSurface">
                     <h3 className="text-xl font-bold text-slate-800 dark:text-white">{t.settings}</h3>
                     <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500"><X size={18} /></button>
                 </div>
 
-                {/* Tab Bar */}
-                <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
-                    <button onClick={() => { setActiveTab('account'); triggerHaptic(10); }} className={`flex-1 py-1.5 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'account' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-lg shadow-blue-500/10' : 'text-slate-500'}`}>
-                        <Server size={14} /> <span className="hidden xs:inline">{t.tabAccount}</span>
-                    </button>
-                    <button onClick={() => { setActiveTab('catalog'); triggerHaptic(10); }} className={`flex-1 py-1.5 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'catalog' ? 'bg-white dark:bg-slate-700 text-amber-600 shadow-lg shadow-amber-500/10' : 'text-slate-500'}`}>
-                        <Package size={14} /> <span className="hidden xs:inline">{t.tabCatalog}</span>
-                    </button>
-                    <button onClick={() => { setActiveTab('other'); triggerHaptic(10); }} className={`flex-1 py-1.5 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'other' ? 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-lg shadow-slate-500/10' : 'text-slate-500'}`}>
-                        <Settings2 size={14} /> <span className="hidden xs:inline">{t.tabOther}</span>
-                    </button>
-                    <button
-                        onClick={() => {
-                            setActiveTab('about');
-                            triggerHaptic(10);
-                        }}
-                        className={`flex-1 py-1.5 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'about' ? 'bg-white dark:bg-slate-700 text-purple-600 shadow-lg shadow-purple-500/10' : 'text-slate-500'}`}
-                    >
-                        <AlertCircle size={14} /> <span className="hidden xs:inline">{t.tabAbout}</span>
-                    </button>
+                {/* Tab Bar - Fixed */}
+                <div className="px-6 pb-2 shrink-0 z-10 bg-white dark:bg-darkSurface">
+                    <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+                        <button onClick={() => { setActiveTab('account'); triggerHaptic(10); }} className={`flex-1 py-2 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'account' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-[0_2px_8px_-2px_rgba(37,99,235,0.2)]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                            <Server size={14} /> <span className="hidden xs:inline">{t.tabAccount}</span>
+                        </button>
+                        <button onClick={() => { setActiveTab('catalog'); triggerHaptic(10); }} className={`flex-1 py-2 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'catalog' ? 'bg-white dark:bg-slate-700 text-amber-600 shadow-[0_2px_8px_-2px_rgba(217,119,6,0.2)]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                            <Package size={14} /> <span className="hidden xs:inline">{t.tabCatalog}</span>
+                        </button>
+                        <button onClick={() => { setActiveTab('other'); triggerHaptic(10); }} className={`flex-1 py-2 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'other' ? 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-[0_2px_8px_-2px_rgba(100,116,139,0.2)]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                            <Settings2 size={14} /> <span className="hidden xs:inline">{t.tabOther}</span>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('about');
+                                triggerHaptic(10);
+                            }}
+                            className={`flex-1 py-2 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'about' ? 'bg-white dark:bg-slate-700 text-purple-600 shadow-[0_2px_8px_-2px_rgba(147,51,234,0.2)]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                        >
+                            <AlertCircle size={14} /> <span className="hidden xs:inline">{t.tabAbout}</span>
+                        </button>
+                    </div>
                 </div>
 
-                {/* Tab Content */}
-                {activeTab === 'account' && renderAccountTab()}
-                {activeTab === 'catalog' && renderCatalogTab()}
-                {activeTab === 'other' && renderOtherTab()}
-                {activeTab === 'about' && renderAboutTab()}
+                {/* Tab Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2">
+                    {activeTab === 'account' && renderAccountTab()}
+                    {activeTab === 'catalog' && renderCatalogTab()}
+                    {activeTab === 'other' && renderOtherTab()}
+                    {activeTab === 'about' && renderAboutTab()}
+                </div>
             </div>
         </div>
     );

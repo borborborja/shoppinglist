@@ -20,6 +20,7 @@ interface ShopState {
     // Data
     items: ShopItem[];
     categories: Categories;
+    listName: string | null;
 
     // UI State
     lang: Lang;
@@ -64,6 +65,7 @@ interface ShopState {
 
     addCategoryItem: (catKey: string, name: LocalizedItem) => void;
     removeCategoryItem: (catKey: string, idx: number) => void;
+    setListName: (name: string | null) => void;
 
     // Category Management
     addCategory: (key: string, icon: string) => void;
@@ -71,9 +73,9 @@ interface ShopState {
 
     // Sync Actions
     setSyncState: (s: Partial<SyncState>) => void;
-    syncFromRemote: (data: { items: ShopItem[], categories?: Categories }) => void;
+    syncFromRemote: (data: { items: ShopItem[], categories?: Categories, listName?: string | null }) => void;
     resetDefaults: () => void;
-    importData: (items: ShopItem[], categories: Categories) => void;
+    importData: (items: ShopItem[], categories: Categories, listName?: string | null) => void;
     addToSyncHistory: (code: string) => void;
     loadCatalog: () => Promise<void>;
 
@@ -89,6 +91,7 @@ export const useShopStore = create<ShopState>()(
         (set) => ({
             items: [],
             categories: defaultCategories,
+            listName: null,
             lang: 'ca',
             appMode: 'planning',
             viewMode: 'list',
@@ -167,6 +170,11 @@ export const useShopStore = create<ShopState>()(
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
 
+            setListName: (listName) => set((state) => ({
+                listName,
+                sync: { ...state.sync, lastLocalInteraction: Date.now() }
+            })),
+
             addCategoryItem: (catKey, item) => set((state) => {
                 const cats = { ...state.categories };
                 if (cats[catKey]) {
@@ -199,10 +207,10 @@ export const useShopStore = create<ShopState>()(
             }),
 
             setSyncState: (s) => set((state) => ({ sync: { ...state.sync, ...s } })),
-            syncFromRemote: (data) => set({ items: data.items, categories: data.categories || defaultCategories }),
+            syncFromRemote: (data) => set({ items: data.items, categories: data.categories || defaultCategories, listName: data.listName || null }),
 
-            resetDefaults: () => set({ items: [], categories: defaultCategories }),
-            importData: (items, categories) => set({ items, categories }),
+            resetDefaults: () => set({ items: [], categories: defaultCategories, listName: null }),
+            importData: (items, categories, listName) => set({ items, categories, listName: listName || null }),
 
             // Auth Actions
             setAuth: (auth) => set((state) => ({ auth: { ...state.auth, ...auth } })),
@@ -269,6 +277,7 @@ export const useShopStore = create<ShopState>()(
             partialize: (state) => ({
                 items: state.items,
                 categories: state.categories,
+                listName: state.listName,
                 lang: state.lang,
                 appMode: state.appMode,
                 viewMode: state.viewMode,

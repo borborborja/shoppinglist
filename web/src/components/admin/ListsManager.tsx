@@ -20,6 +20,7 @@ interface CategoryItem {
 interface ShoppingListData {
     items?: ShopItem[];
     categories?: { [key: string]: CategoryItem };
+    listName?: string;
 }
 
 interface ShoppingListRecord {
@@ -307,6 +308,9 @@ const ListsManager = () => {
                                                     <div className="flex flex-col">
                                                         <span className="font-mono font-bold text-slate-900 dark:text-slate-100 uppercase leading-none">
                                                             {list.list_code}
+                                                        </span>
+                                                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                                            {list.data.listName || 'Mi Lista'}
                                                         </span>
                                                         <span className="text-[10px] text-slate-400 font-medium mt-1">#{list.id}</span>
                                                     </div>

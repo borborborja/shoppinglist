@@ -10,6 +10,7 @@ export function useListSync() {
         categories,
         notifyOnAdd,
         notifyOnCheck,
+        listName,
         lang,
         setSyncState,
         syncFromRemote,
@@ -58,7 +59,7 @@ export function useListSync() {
 
                     // Connect
                     setSyncState({ msg: 'Connecting...', msgType: 'info' });
-                    syncFromRemote({ items: remoteData.items || [], categories: remoteData.categories || undefined });
+                    syncFromRemote({ items: remoteData.items || [], categories: remoteData.categories || undefined, listName: remoteData.listName });
                     setSyncState({ connected: true, code: urlCode, recordId: record.id, msg: 'Connected!', msgType: 'success' });
                     addToSyncHistory(urlCode);
                     localStorage.setItem('shopListSyncCode', urlCode);
@@ -91,12 +92,12 @@ export function useListSync() {
     useEffect(() => {
         const syncToRemote = async () => {
             if (sync.connected && sync.recordId) {
-                const currentState = JSON.stringify({ items, categories });
+                const currentState = JSON.stringify({ items, categories, listName });
                 if (currentState === lastRemoteStateRef.current) return;
 
                 try {
                     await pb.collection('shopping_lists').update(sync.recordId, {
-                        data: { items, categories }
+                        data: { items, categories, listName }
                     });
                     lastRemoteStateRef.current = currentState;
                 } catch (e) {
@@ -107,7 +108,7 @@ export function useListSync() {
 
         const timer = setTimeout(syncToRemote, 200);
         return () => clearTimeout(timer);
-    }, [items, categories, sync.connected, sync.recordId]);
+    }, [items, categories, listName, sync.connected, sync.recordId]);
 
     // 3. Subscribe to remote updates
     useEffect(() => {
@@ -175,7 +176,27 @@ export function useListSync() {
                     handleNotifications(localItems, mergedItems, notifyOnAdd, notifyOnCheck, lang);
 
                     // Update Store
-                    syncFromRemote({ items: mergedItems, categories: remoteData.categories });
+                    // DIRTY CHECK FOR LIST NAME
+                    // We only accept remote listName if we don't have a "dirty" local change.
+                    // How do we know if we have a dirty local change?
+                    // We compare current local listName with the one in lastRemoteStateRef (our last synced state).
+                    // If they are different, we have unsynced local changes -> Ignore remote update for listName.
+                    let nameToUse = remoteData.listName;
+
+                    try {
+                        const lastSyncedState = lastRemoteStateRef.current ? JSON.parse(lastRemoteStateRef.current) : null;
+                        const currentLocalName = useShopStore.getState().listName;
+
+                        // If we have a last synced state, and our current local name differs from it,
+                        // it means we have a pending local change.
+                        if (lastSyncedState && currentLocalName !== lastSyncedState.listName) {
+                            nameToUse = currentLocalName; // Keep local name
+                        }
+                    } catch (e) {
+                        // Fallback to remote if something fails
+                    }
+
+                    syncFromRemote({ items: mergedItems, categories: remoteData.categories, listName: nameToUse });
                     setSyncState({ lastSync: Date.now() });
                 }
             });
