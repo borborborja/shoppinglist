@@ -122,46 +122,13 @@ const ListView = () => {
         handleDelete: (id: number, e: React.MouseEvent) => void,
         getItemClass: () => string
     }) => {
-        const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-        const isLongPressActive = useRef(false);
-
-        const startPress = () => {
-            isLongPressActive.current = false;
-            timerRef.current = setTimeout(() => {
-                isLongPressActive.current = true;
-                setEditingItem(item);
-                triggerHaptic(50);
-            }, 700); // 700ms feels snappier than 1s for mobile
-        };
-
-        const endPress = () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
-        };
-
         const handleOnClick = () => {
-            if (isLongPressActive.current) {
-                isLongPressActive.current = false;
-                return;
-            }
             toggleCheck(item.id);
             triggerHaptic(20);
         };
 
         return (
             <div
-                onMouseDown={startPress}
-                onMouseUp={endPress}
-                onMouseLeave={endPress}
-                onTouchStart={() => {
-                    // Prevent context menu on long press devices usually
-                    startPress();
-                }}
-                onTouchMove={endPress} // Cancel press if scrolling
-                onTouchCancel={endPress}
-                onTouchEnd={endPress}
                 onClick={handleOnClick}
                 className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] select-none ${getItemClass()} ${item.checked
                     ? 'bg-slate-50 dark:bg-slate-800/40 border-transparent grayscale'

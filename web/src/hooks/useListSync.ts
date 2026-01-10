@@ -158,7 +158,12 @@ export function useListSync() {
                             // If lastSync is null/0, we act conservatively and keep the item.
                             const lastSyncTime = useShopStore.getState().sync.lastSync || 0;
 
-                            if (localTime > lastSyncTime) {
+                            // GRACE PERIOD FIX:
+                            // Even if localTime <= lastSyncTime (which can happen if lastSync jumps ahead due to unrelated server echo),
+                            // we MUST preserve items created very recently (e.g. last 5 seconds).
+                            const isVeryRecent = (Date.now() - localTime) < 5000;
+
+                            if (localTime > lastSyncTime || isVeryRecent) {
                                 // Keep it, it's a new local (or recently updated) item pending push
                                 mergedItems.push(localItem);
                                 processedIds.add(localItem.id);

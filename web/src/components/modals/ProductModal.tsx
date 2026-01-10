@@ -28,10 +28,9 @@ const ProductModal = ({ item: initialItem, onClose }: ProductModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center sm:items-center items-end">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative w-full sm:w-[28rem] bg-white dark:bg-darkSurface rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh] animate-slide-up m-0 sm:m-4 ring-1 ring-white/10 z-50">
-                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 sm:hidden"></div>
+            <div className="relative w-11/12 max-w-md bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh] animate-pop m-4 ring-1 ring-white/10 z-50">
                 <div className="flex justify-between items-start mb-6">
                     <div className="pr-8">
                         <h3 className="text-2xl font-bold text-slate-800 dark:text-white break-words leading-tight mb-2">{initialItem.name}</h3>
