@@ -133,11 +133,17 @@ export function useListSync() {
                         if (remoteItem) {
                             // Conflict: Compare timestamps
                             // If remote is newer, use remote. Else keep local.
-                            // If timestamps missing (legacy), prefer remote to ensure eventual consistency
+
                             const localTime = localItem.updatedAt || 0;
                             const remoteTime = remoteItem.updatedAt || 0;
 
-                            if (remoteTime > localTime) {
+                            // TOLERANCE FIX:
+                            // If the local item was modified VERY recently (e.g. last 3 seconds),
+                            // we prioritize it to prevent "bouncing" caused by server latency or clock skew
+                            // where an old server state (or slightly future server clock) overwrites a fresh user action.
+                            const isRecentLocalUpdate = (Date.now() - localTime) < 3000;
+
+                            if (remoteTime > localTime && !isRecentLocalUpdate) {
                                 mergedItems.push(remoteItem);
                             } else {
                                 mergedItems.push(localItem);
