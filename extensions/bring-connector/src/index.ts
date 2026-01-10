@@ -17,7 +17,7 @@ const pb = new PocketBase(PB_URL);
 const bring = new bringApi({ email: BRING_EMAIL, password: BRING_PASSWORD });
 
 async function main() {
-    console.log('Starting ShopList <-> Bring Connector...');
+    console.log('Starting ShoppingList <-> Bring Connector...');
 
     // 1. Login to PocketBase
     try {

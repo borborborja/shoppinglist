@@ -1,7 +1,7 @@
 {
     "name": "shoplist-bring-connector",
     "version": "1.0.0",
-    "description": "Bring! Shopping List Connector for ShopList",
+    "description": "Bring! Shopping List Connector for ShoppingList",
     "main": "dist/index.js",
     "scripts": {
         "start": "ts-node src/index.ts",

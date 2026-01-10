@@ -117,7 +117,7 @@ go run cmd/server/main.go serve  # http://localhost:8090
 ### Docker Build
 
 ```bash
-docker build -t shoplist .
+docker build -t shoppinglist .
 ```
 
 ### Manual Build
@@ -127,7 +127,7 @@ docker build -t shoplist .
 cd web && npm install && npm run build && cd ..
 
 # Build backend (embeds frontend)
-go build -o shoplist ./cmd/server
+go build -o shoppinglist ./cmd/server
 ```
 
 ---
