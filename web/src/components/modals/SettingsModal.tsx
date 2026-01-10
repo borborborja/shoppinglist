@@ -266,7 +266,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         const blob = new Blob([JSON.stringify({ items, categories, listName })], { type: "application/json" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `ShopList_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+        link.download = `ShoppingList_Backup_${new Date().toISOString().slice(0, 10)}.json`;
         link.click();
     };
     const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -321,7 +321,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                             </p>
                         )}
                         <p className="text-[10px] text-slate-500 mt-2 px-1">
-                            Introduce la URL de tu servidor ShopList para sincronizar.
+                            Introduce la URL de tu servidor ShoppingList para sincronizar.
                         </p>
                     </div>
                 )}
@@ -419,7 +419,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                 <div className="flex items-center gap-1">
                                     <button
                                         onClick={() => {
-                                            const text = encodeURIComponent(`¡Únete a mi lista de la compra en ShopList!\nCódigo: ${sync.code}\nEnlace directo: ${window.location.origin}/?c=${sync.code}`);
+                                            const text = encodeURIComponent(`¡Únete a mi lista de la compra en ShoppingList!\nCódigo: ${sync.code}\nEnlace directo: ${window.location.origin}/?c=${sync.code}`);
                                             window.open(`https://wa.me/?text=${text}`, '_blank');
                                         }}
                                         className="text-slate-400 hover:text-green-500 p-1.5 transition-colors"
@@ -429,7 +429,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                     </button>
                                     <button
                                         onClick={() => {
-                                            const text = encodeURIComponent(`ShopList: Lista compartida`);
+                                            const text = encodeURIComponent(`ShoppingList: Lista compartida`);
                                             const url = encodeURIComponent(`${window.location.origin}/?c=${sync.code}`);
                                             window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
                                         }}
@@ -793,13 +793,13 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
             </div>
 
             <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">ShopList</h2>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">ShoppingList</h2>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.aboutDev}</p>
             </div>
 
             <div className="flex flex-col gap-3 w-content">
                 <a
-                    href="https://github.com/borjabalsera/llista_compra"
+                    href="https://github.com/borborborja/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl text-slate-700 dark:text-slate-300 transition-all active:scale-95 group"

@@ -101,7 +101,7 @@ export const useShopStore = create<ShopState>()(
             isAmoled: false,
             notifyOnAdd: true,
             notifyOnCheck: true,
-            serverName: 'ShopList',
+            serverName: 'ShoppingList',
             activeUsers: [],
             sync: { connected: false, code: null, recordId: null, msg: '', msgType: 'info', syncHistory: [], lastSync: null, syncVersion: 0, lastLocalInteraction: 0 },
             auth: { isLoggedIn: false, email: null, userId: null, username: null },
