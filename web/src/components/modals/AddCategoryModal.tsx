@@ -94,7 +94,7 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
                 </div>
             </div>
         </div>
-        </div >,
+
     document.body
     );
 };
