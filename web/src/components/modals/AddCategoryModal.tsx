@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
@@ -26,8 +26,6 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
             onClose();
         }
     };
-
-    const emojis = EMOJI_LIST;
 
     const emojis = EMOJI_LIST;
 
@@ -93,9 +91,8 @@ const AddCategoryModal = ({ onClose }: AddCategoryModalProps) => {
                     </button>
                 </div>
             </div>
-        </div>
-
-    document.body
+        </div>,
+        document.body
     );
 };
 
