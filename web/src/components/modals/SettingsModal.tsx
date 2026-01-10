@@ -777,7 +777,10 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
 
     const renderAboutTab = () => (
         <div className="space-y-8 py-4 animate-fade-in flex flex-col items-center text-center">
-            <div className="w-24 h-24 flex items-center justify-center overflow-hidden rounded-[2rem] animate-pop">
+            <div
+                onClick={handleAboutClick}
+                className="w-24 h-24 flex items-center justify-center overflow-hidden rounded-[2rem] animate-pop cursor-pointer active:scale-90 transition-transform shadow-lg hover:shadow-xl"
+            >
                 <img src="/icon.png" alt="Logo" className="w-full h-full object-cover rounded-[2rem]" />
             </div>
 
@@ -851,7 +854,6 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                         onClick={() => {
                             setActiveTab('about');
                             triggerHaptic(10);
-                            handleAboutClick();
                         }}
                         className={`flex-1 py-1.5 px-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 ${activeTab === 'about' ? 'bg-white dark:bg-slate-700 text-purple-600 shadow-lg shadow-purple-500/10' : 'text-slate-500'}`}
                     >
