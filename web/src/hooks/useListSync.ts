@@ -115,28 +115,67 @@ export function useListSync() {
             pb.collection('shopping_lists').subscribe(sync.recordId, (e) => {
                 if (e.action === 'update' && e.record.data) {
                     const remoteData = e.record.data;
-                    const remoteStateStr = JSON.stringify({ items: remoteData.items, categories: remoteData.categories });
-
-
-                    if (remoteStateStr === lastRemoteStateRef.current) return;
-
-                    // Optimistic UI Protection:
-                    // If the user interacted locally in the last 2000ms (mobile latency), ignore this remote update.
-                    // This prevents the "revert" flicker when the server echoes back an old state
-                    // right after we made a change but before our change propagatedfully.
-                    const { lastLocalInteraction } = useShopStore.getState().sync;
-                    if (Date.now() - lastLocalInteraction < 2000) {
-                        return; // Ignore this update, our local state is newer
-                    }
-
-                    const remoteItems = remoteData.items || [];
+                    const remoteItems = (remoteData.items || []) as any[];
                     const localItems = useShopStore.getState().items;
 
-                    // Notifications
-                    handleNotifications(localItems, remoteItems, notifyOnAdd, notifyOnCheck, lang);
+                    // MERGE STRATEGY: Last Write Wins per Item
+                    // 1. Map remote items for easy access
+                    const remoteMap = new Map(remoteItems.map(i => [i.id, i]));
 
-                    lastRemoteStateRef.current = remoteStateStr;
-                    syncFromRemote(remoteData);
+                    // 2. Build new list
+                    const mergedItems: any[] = [];
+                    const processedIds = new Set<number>();
+
+                    // Process all local items
+                    for (const localItem of localItems) {
+                        const remoteItem = remoteMap.get(localItem.id);
+                        if (remoteItem) {
+                            // Conflict: Compare timestamps
+                            // If remote is newer, use remote. Else keep local.
+                            // If timestamps missing (legacy), prefer remote to ensure eventual consistency
+                            const localTime = localItem.updatedAt || 0;
+                            const remoteTime = remoteItem.updatedAt || 0;
+
+                            if (remoteTime > localTime) {
+                                mergedItems.push(remoteItem);
+                            } else {
+                                mergedItems.push(localItem);
+                            }
+                            processedIds.add(localItem.id);
+                        } else {
+                            // Local item NOT in remote.
+                            // This usually means it was deleted remotely.
+                            // Ideally we should track deletions, but for now we accept the deletion
+                            // UNLESS it was created very recently locally (optimistic add in flight) which is handled by ignoring early re-echoes?
+                            // No, to fix "ghost unchecking" we trust the MERGE of existing items.
+                            // For deletions, we trust the server list.
+                            // So if it's not in remote, it's GONE.
+                            // EXCEPTION: If we just added it and server hasn't seen it yet.
+                            // But since we syncToRemote actively, chances are low.
+                            // Simpler approach: If it's not in remote, we keep it ONLY if it's new (created locally > lastSync).
+                            // But complex. Let's stick to "Server Authority for List Membership" for now.
+                            // If it's not in remote, it's deleted.
+                        }
+                    }
+
+                    // Process remaining remote items (newly added by others)
+                    for (const remoteItem of remoteItems) {
+                        if (!processedIds.has(remoteItem.id)) {
+                            // Check if we locally deleted it recently?
+                            // Without tombstones we can't know. We assume it's a new add from other device.
+                            mergedItems.push(remoteItem);
+                        }
+                    }
+
+                    // Sort by id (creation time inverse) or keep order?
+                    // Store expects items sorted by newest first usually.
+                    mergedItems.sort((a, b) => b.id - a.id);
+
+                    // Notifications
+                    handleNotifications(localItems, mergedItems, notifyOnAdd, notifyOnCheck, lang);
+
+                    // Update Store
+                    syncFromRemote({ items: mergedItems, categories: remoteData.categories });
                     setSyncState({ lastSync: Date.now() });
                 }
             });

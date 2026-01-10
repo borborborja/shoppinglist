@@ -144,19 +144,22 @@ export const useShopStore = create<ShopState>()(
             setShowCompletedInline: (showCompletedInline) => set({ showCompletedInline }),
 
             addItem: (name, cat = 'other') => set((state) => ({
-                items: [{ id: Date.now(), name, checked: false, note: '', category: cat }, ...state.items],
+                items: [{ id: Date.now(), name, checked: false, note: '', category: cat, updatedAt: Date.now() }, ...state.items],
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
             toggleCheck: (id) => set((state) => ({
-                items: state.items.map(i => i.id === id ? { ...i, checked: !i.checked } : i),
+                items: state.items.map(i => i.id === id ? { ...i, checked: !i.checked, updatedAt: Date.now() } : i),
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
             deleteItem: (id) => set((state) => ({
+                // Mark as deleted? No, for now we just delete locally. The Sync hook will handle merging deleted items if needed.
+                // Or better: keep as is, but if we wanted "tombstones" we would mark deletedAt.
+                // Current simpler approach: just delete.
                 items: state.items.filter(i => i.id !== id),
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
             updateItemNote: (id, note) => set((state) => ({
-                items: state.items.map(i => i.id === id ? { ...i, note } : i),
+                items: state.items.map(i => i.id === id ? { ...i, note, updatedAt: Date.now() } : i),
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
             clearCompleted: () => set((state) => ({

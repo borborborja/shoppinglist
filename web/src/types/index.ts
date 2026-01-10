@@ -21,6 +21,7 @@ export interface ShopItem {
     checked: boolean;
     note: string;
     category: string;
+    updatedAt?: number;
 }
 
 export type AppMode = 'planning' | 'shopping';
