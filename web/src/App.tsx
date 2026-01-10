@@ -36,6 +36,23 @@ function App() {
     };
   }, []);
 
+  // --- Auto Theme Listener ---
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      useShopStore.getState().updateSystemTheme(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    // Ensure correct initial state if in auto mode on mount
+    if (useShopStore.getState().theme === 'auto') {
+      useShopStore.getState().updateSystemTheme(mediaQuery.matches);
+    }
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   // --- Global Lifecycle & updates ---
   useEffect(() => {
     // Restore connection if configured for native

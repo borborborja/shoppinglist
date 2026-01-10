@@ -26,7 +26,7 @@ interface ShopState {
     lang: Lang;
     appMode: AppMode;
     viewMode: ViewMode;
-    theme: 'light' | 'dark' | 'amoled';
+    theme: 'light' | 'dark' | 'amoled' | 'auto';
     isDark: boolean;
     isAmoled: boolean;
     notifyOnAdd: boolean;
@@ -49,7 +49,8 @@ interface ShopState {
     setServerUrl: (url: string) => void;
     setAppMode: (mode: AppMode) => void;
     setViewMode: (mode: ViewMode) => void;
-    setTheme: (theme: 'light' | 'dark' | 'amoled') => void;
+    setTheme: (theme: 'light' | 'dark' | 'amoled' | 'auto') => void;
+    updateSystemTheme: (isSystemDark: boolean) => void;
     toggleTheme: () => void;
     toggleAmoled: () => void;
     setNotifyOnAdd: (val: boolean) => void;
@@ -95,8 +96,8 @@ export const useShopStore = create<ShopState>()(
             lang: 'ca',
             appMode: 'planning',
             viewMode: 'list',
-            theme: 'light',
-            isDark: false,
+            theme: 'auto',
+            isDark: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
             isAmoled: false,
             notifyOnAdd: true,
             notifyOnCheck: true,
@@ -120,16 +121,31 @@ export const useShopStore = create<ShopState>()(
                 return { appMode };
             }),
             setViewMode: (viewMode) => set({ viewMode }),
-            setTheme: (theme) => set({
-                theme,
-                isDark: theme !== 'light',
-                isAmoled: theme === 'amoled'
+            setTheme: (theme) => set(() => {
+                const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                return {
+                    theme,
+                    isDark: theme === 'auto' ? isSystemDark : theme !== 'light',
+                    isAmoled: theme === 'amoled'
+                };
+            }),
+            updateSystemTheme: (isSystemDark) => set((state) => {
+                if (state.theme === 'auto') {
+                    return { isDark: isSystemDark, isAmoled: false };
+                }
+                return {};
             }),
             toggleTheme: () => set((state) => {
-                const newTheme = state.theme === 'light' ? 'dark' : 'light';
+                // Cycle: light -> dark -> auto -> light
+                const order: ('light' | 'dark' | 'auto')[] = ['light', 'dark', 'auto'];
+                const currentIdx = order.indexOf(state.theme === 'amoled' ? 'dark' : state.theme as any);
+                const nextTheme = order[(currentIdx + 1) % order.length];
+
+                const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
                 return {
-                    theme: newTheme,
-                    isDark: newTheme !== 'light',
+                    theme: nextTheme,
+                    isDark: nextTheme === 'auto' ? isSystemDark : nextTheme !== 'light',
                     isAmoled: false
                 };
             }),

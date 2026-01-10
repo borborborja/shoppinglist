@@ -631,57 +631,80 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     );
 
     const renderOtherTab = () => (
-        <div className="space-y-6 animate-fade-in">
-            {/* Theme Selector (3-way switch) */}
-            <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t.theme}</h4>
-                <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl relative">
+        <div className="space-y-4 animate-fade-in">
+            {/* Theme Selector (4-way switch) */}
+            <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">{t.theme}</h4>
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl relative">
                     <div
-                        className={`absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] bg-white dark:bg-slate-600 rounded-xl shadow-lg transition-transform duration-300 ease-out z-0 h-[calc(100%-12px)] ${theme === 'light' ? 'translate-x-0' :
-                            theme === 'dark' ? 'translate-x-full ml-1' :
-                                'translate-x-[200%] ml-2'
+                        className={`absolute top-1 bottom-1 w-[calc(25%-4px)] bg-white dark:bg-slate-600 rounded-lg shadow-sm transition-transform duration-300 ease-out z-0 ${theme === 'light' ? 'translate-x-0' :
+                            theme === 'dark' ? 'translate-x-[100%] ml-1' :
+                                theme === 'amoled' ? 'translate-x-[200%] ml-2' :
+                                    'translate-x-[300%] ml-3'
                             }`}
                     ></div>
                     <button
                         onClick={() => { setTheme('light'); triggerHaptic(10); }}
-                        className={`flex-1 relative z-10 py-3 rounded-xl flex flex-col items-center gap-1 transition-colors ${theme === 'light' ? 'text-blue-600' : 'text-slate-400'}`}
+                        className={`flex-1 relative z-10 py-2 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${theme === 'light' ? 'text-blue-600' : 'text-slate-400'}`}
                     >
-                        <Sun size={18} />
-                        <span className="text-[10px] font-bold uppercase">{t.themeLight}</span>
+                        <Sun size={16} />
+                        <span className="text-[9px] font-bold uppercase">{t.themeLight}</span>
                     </button>
                     <button
                         onClick={() => { setTheme('dark'); triggerHaptic(10); }}
-                        className={`flex-1 relative z-10 py-3 rounded-xl flex flex-col items-center gap-1 transition-colors ${theme === 'dark' ? 'text-blue-400' : 'text-slate-400'}`}
+                        className={`flex-1 relative z-10 py-2 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${theme === 'dark' ? 'text-blue-400' : 'text-slate-400'}`}
                     >
-                        <Moon size={18} />
-                        <span className="text-[10px] font-bold uppercase">{t.themeDark}</span>
+                        <Moon size={16} />
+                        <span className="text-[9px] font-bold uppercase">{t.themeDark}</span>
                     </button>
                     <button
                         onClick={() => { setTheme('amoled'); triggerHaptic(10); }}
-                        className={`flex-1 relative z-10 py-3 rounded-xl flex flex-col items-center gap-1 transition-colors ${theme === 'amoled' ? 'text-purple-400' : 'text-slate-400'}`}
+                        className={`flex-1 relative z-10 py-2 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${theme === 'amoled' ? 'text-purple-400' : 'text-slate-400'}`}
                     >
-                        <div className="w-4.5 h-4.5 rounded-full bg-black border border-slate-700"></div>
-                        <span className="text-[10px] font-bold uppercase">{t.themeAmoled}</span>
+                        <div className="w-4 h-4 rounded-full bg-black border border-slate-700"></div>
+                        <span className="text-[9px] font-bold uppercase">{t.themeAmoled}</span>
+                    </button>
+                    <button
+                        onClick={() => { setTheme('auto'); triggerHaptic(10); }}
+                        className={`flex-1 relative z-10 py-2 rounded-lg flex flex-col items-center gap-0.5 transition-colors ${theme === 'auto' ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}
+                    >
+                        <Settings2 size={16} />
+                        <span className="text-[9px] font-bold uppercase">Auto</span>
                     </button>
                 </div>
             </div>
 
+            {/* Language Selector (Moved here) */}
+            <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Language</h4>
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl relative">
+                    {['ca', 'es', 'en'].map((l) => (
+                        <button
+                            key={l}
+                            onClick={() => { setLang(l as any); triggerHaptic(10); }}
+                            className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${lang === l ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-white shadow-sm' : 'text-slate-400'}`}
+                        >
+                            {l}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Grouped Notifications Section */}
-            <div className="bg-slate-50 dark:bg-slate-800/30 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Bell size={16} /></div>
-                    <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-widest">{t.alerts}</h4>
+            <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Bell size={14} /></div>
+                    <h4 className="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-widest">{t.alerts}</h4>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {/* Notify on Add */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h4 className="text-xs font-bold text-slate-800 dark:text-white">{t.notifyAdd}</h4>
-                            <p className="text-[10px] text-slate-500">Al añadir productos nuevos</p>
+                            <h4 className="text-[11px] font-bold text-slate-800 dark:text-white">{t.notifyAdd}</h4>
                         </div>
-                        <button onClick={() => { setNotifyOnAdd(!notifyOnAdd); triggerHaptic(10); }} className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${notifyOnAdd ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                            <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${notifyOnAdd ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        <button onClick={() => { setNotifyOnAdd(!notifyOnAdd); triggerHaptic(10); }} className={`relative w-9 h-5 rounded-full transition-colors duration-300 ${notifyOnAdd ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                            <div className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${notifyOnAdd ? 'translate-x-4' : 'translate-x-0'}`}></div>
                         </button>
                     </div>
 
@@ -690,90 +713,66 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                     {/* Notify on Check */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h4 className="text-xs font-bold text-slate-800 dark:text-white">{t.notifyCheck}</h4>
-                            <p className="text-[10px] text-slate-500">Al marcar productos como comprados</p>
+                            <h4 className="text-[11px] font-bold text-slate-800 dark:text-white">{t.notifyCheck}</h4>
                         </div>
-                        <button onClick={() => { setNotifyOnCheck(!notifyOnCheck); triggerHaptic(10); }} className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${notifyOnCheck ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                            <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${notifyOnCheck ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        <button onClick={() => { setNotifyOnCheck(!notifyOnCheck); triggerHaptic(10); }} className={`relative w-9 h-5 rounded-full transition-colors duration-300 ${notifyOnCheck ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                            <div className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${notifyOnCheck ? 'translate-x-4' : 'translate-x-0'}`}></div>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Data Backup */}
-            <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t.data}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                    <button onClick={exportData} className="group flex flex-col items-center justify-center p-4 border-2 border-slate-100 dark:border-slate-800 rounded-2xl hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all bg-white dark:bg-darkSurface shadow-sm">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition"><Download size={20} /></div>
-                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{t.export}</span>
-                    </button>
-                    <label className="group flex flex-col items-center justify-center p-4 border-2 border-slate-100 dark:border-slate-800 rounded-2xl hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/10 transition-all bg-white dark:bg-darkSurface shadow-sm cursor-pointer">
-                        <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 flex items-center justify-center mb-2 group-hover:scale-110 transition"><Upload size={20} /></div>
-                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{t.import}</span>
-                        <input type="file" className="hidden" accept=".json" onChange={handleImportData} />
-                    </label>
-                </div>
+            {/* Compact System Actions Grid */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                {/* Export */}
+                <button onClick={exportData} className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <Download size={14} className="text-blue-500" />
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{t.export}</span>
+                </button>
+
+                {/* Import */}
+                <label className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer">
+                    <Upload size={14} className="text-green-500" />
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{t.import}</span>
+                    <input type="file" className="hidden" accept=".json" onChange={handleImportData} />
+                </label>
+
+                {/* Force Update */}
+                <button
+                    onClick={() => {
+                        triggerHaptic(10);
+                        window.location.reload();
+                    }}
+                    className="flex items-center justify-center gap-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 transition"
+                >
+                    <RefreshCw size={14} className="text-slate-500" />
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Reload</span>
+                </button>
+
+                {/* Reset */}
+                <button onClick={() => { if (confirm(t.resetBtn + '?')) { resetDefaults(); onClose(); } }} className="flex items-center justify-center gap-2 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl hover:bg-red-100 transition">
+                    <Trash2 size={14} className="text-red-500" />
+                    <span className="text-[10px] font-bold text-red-600 dark:text-red-400">{t.resetBtn}</span>
+                </button>
             </div>
 
-            {/* System Actions Area */}
-            {/* Compact System & PWA Area */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                <div className="flex gap-2">
-                    <div className="flex-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative">
-                        {/* Language Selector */}
-                        {['ca', 'es', 'en'].map((l) => (
-                            <button
-                                key={l}
-                                onClick={() => { setLang(l as any); triggerHaptic(10); }}
-                                className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${lang === l ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-white shadow-sm' : 'text-slate-400'}`}
-                            >
-                                {l}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Install App Button - Discrete */}
-                {installPrompt && (
-                    <button
-                        onClick={() => {
-                            installPrompt.prompt();
-                            installPrompt.userChoice.then((choiceResult: any) => {
-                                if (choiceResult.outcome === 'accepted') {
-                                    onInstall?.();
-                                }
-                            });
-                            triggerHaptic(10);
-                        }}
-                        className="w-full py-3 rounded-xl border border-blue-200 dark:border-blue-800/30 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
-                    >
-                        <Download size={14} /> {t.installApp}
-                    </button>
-                )}
-
-                <div className="grid grid-cols-2 gap-2">
-                    <button
-                        onClick={() => {
-                            if ('serviceWorker' in navigator) {
-                                navigator.serviceWorker.getRegistrations().then(registrations => {
-                                    for (let registration of registrations) registration.unregister();
-                                    window.location.reload();
-                                });
-                            } else {
-                                window.location.reload();
+            {/* Install App Button - Full Width */}
+            {installPrompt && (
+                <button
+                    onClick={() => {
+                        installPrompt.prompt();
+                        installPrompt.userChoice.then((choiceResult: any) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                onInstall?.();
                             }
-                        }}
-                        className="flex items-center justify-center gap-1.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold text-[10px] transition hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
-                    >
-                        <RefreshCw size={12} /> Force Update
-                    </button>
-
-                    <button onClick={() => { if (confirm(t.resetBtn + '?')) { resetDefaults(); onClose(); } }} className="text-[10px] font-bold text-red-400 hover:text-red-500 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/10 p-3 rounded-xl transition flex items-center justify-center gap-1.5">
-                        <Trash2 size={12} /> {t.resetBtn}
-                    </button>
-                </div>
-            </div>
+                        });
+                        triggerHaptic(10);
+                    }}
+                    className="w-full py-3 rounded-xl bg-blue-600 text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-lg shadow-blue-500/20"
+                >
+                    <Download size={14} /> {t.installApp}
+                </button>
+            )}
         </div>
     );
 
