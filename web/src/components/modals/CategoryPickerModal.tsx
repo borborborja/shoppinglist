@@ -26,7 +26,6 @@ const CategoryPickerModal = ({ productName, onClose, onConfirm }: CategoryPicker
         }
     };
 
-
     // Prevent body scroll when modal is open
     useEffect(() => {
         document.body.style.overflow = 'hidden';
