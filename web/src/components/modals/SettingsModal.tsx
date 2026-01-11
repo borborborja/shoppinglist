@@ -790,7 +790,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
 
     useEffect(() => {
         if (activeTab === 'about') {
-            fetch('https://api.github.com/repos/borborborja/shoplist/releases/latest')
+            fetch('https://api.github.com/repos/borborborja/shoppinglist/releases/latest')
                 .then(res => res.json())
                 .then(data => {
                     const currentVersion = import.meta.env.VITE_APP_VERSION || '0.0.0';
@@ -842,7 +842,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
 
             <div className="flex flex-col gap-3 w-content">
                 <a
-                    href="https://github.com/borborborja/"
+                    href="https://github.com/borborborja/shoppinglist"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl text-slate-700 dark:text-slate-300 transition-all active:scale-95 group"

@@ -18,7 +18,7 @@ The easiest way to run ShoppingList is using the pre-built image from Docker Hub
 
 ```bash
 # Download the hub compose file
-curl -O https://raw.githubusercontent.com/borborborja/llista_compra/main/docker-compose.hub.yml
+curl -O https://raw.githubusercontent.com/borborborja/shoppinglist/main/docker-compose.hub.yml
 
 # Start the application
 docker-compose -f docker-compose.hub.yml up -d
