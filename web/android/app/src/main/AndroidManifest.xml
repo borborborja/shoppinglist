@@ -18,6 +18,26 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Deep Links: Custom Scheme (shoppinglist://) -->
+            <!-- This allows opening the app from a web button even for dynamic domains -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="shoppinglist" />
+            </intent-filter>
+
+            <!-- App Links: HTTPS (Verified Domains) -->
+            <!-- Ideally this would be dynamic, but Android requires explicit domains here. -->
+            <!-- This placeholder allows users to replace it easily via manifestPlaceholders or simply have it ready -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="shoppinglist.borja.app" />
+                <!-- Add more hosts here if needed or use manifestPlaceholders -->
+            </intent-filter>
         </activity>
 
         <provider

@@ -55,6 +55,27 @@ function App() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // --- Global Theme Sync ---
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    if (isAmoled) {
+      document.documentElement.classList.add('amoled');
+    } else {
+      document.documentElement.classList.remove('amoled');
+    }
+
+    // Also set meta theme-color for mobile browsrs
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', isAmoled ? '#000000' : isDark ? '#0f172a' : '#ffffff');
+    }
+  }, [isDark, isAmoled]);
+
   // --- Global Lifecycle & updates ---
   useEffect(() => {
     // Restore connection if configured for native
@@ -119,6 +140,54 @@ function App() {
       clearInterval(updateInterval);
     };
   }, []); // Dependencies empty to run once on mount (hooks handle their own stale closures if well designed, or we use refs)
+
+  // --- Deep Link Handling ---
+  useEffect(() => {
+    import('@capacitor/app').then(({ App: CapApp }) => {
+      CapApp.addListener('appUrlOpen', async (data) => {
+        try {
+          const url = new URL(data.url);
+
+          // Handle Custom Scheme: shoppinglist://open?server=...&c=...
+          if (url.protocol.includes('shoppinglist')) {
+            const server = url.searchParams.get('server');
+            const code = url.searchParams.get('c');
+
+            if (server) {
+              // If a server is specified in the link, we switch to it (Dynamic!)
+              // Use the store properly outside of component if needed or via hook
+              useShopStore.getState().setServerUrl(server);
+              // Re-init PB
+              import('./lib/pocketbase').then(({ reinitializePocketBase }) => {
+                reinitializePocketBase(server);
+              });
+            }
+
+            if (code) {
+              // Trigger the sync modal flow
+              // We can set a temporary storage or state that the modal checks
+              // For now, let's assume we want to open settings
+              setShowSettings(true);
+              // We can emit a custom event or set a global state for the modal to pick up
+              window.dispatchEvent(new CustomEvent('deep-link-code', { detail: code }));
+            }
+          } else {
+            // Handle standard web links (https://domain.com/?c=XYZ) if intercepted
+            const code = url.searchParams.get('c');
+            if (code) {
+              setShowSettings(true);
+              // Slight delay to ensure modal mounts handling the event
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('deep-link-code', { detail: code }));
+              }, 500);
+            }
+          }
+        } catch (e) {
+          console.error('Deep Link Error', e);
+        }
+      });
+    });
+  }, []);
 
   // --- Web App Status Check ---
   const [isWebAppEnabled, setIsWebAppEnabled] = useState(true);

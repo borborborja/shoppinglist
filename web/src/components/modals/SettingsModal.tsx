@@ -45,6 +45,20 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     const [newCatKey, setNewCatKey] = useState('');
     const [newCatIcon, setNewCatIcon] = useState('📦');
 
+    // --- Deep Link Listener ---
+    useEffect(() => {
+        const handleDeepLink = (e: CustomEvent) => {
+            const code = e.detail;
+            if (code) {
+                setSyncInputCode(code);
+                // Optionally auto-connect
+                connectSync(code);
+            }
+        };
+        window.addEventListener('deep-link-code', handleDeepLink as EventListener);
+        return () => window.removeEventListener('deep-link-code', handleDeepLink as EventListener);
+    }, []);
+
     // Server URL State (for native apps)
     const { serverUrl, setServerUrl } = useShopStore();
     const [tempServerUrl, setTempServerUrl] = useState(serverUrl || '');
@@ -307,10 +321,36 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                 disabled={connectionStatus.type === 'loading'}
                                 className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 disabled:opacity-50"
                             >
-                                {connectionStatus.type === 'loading' ? <RefreshCw size={12} className="animate-spin" /> : <Wifi size={12} />}
-                                Test
+                                {connectionStatus.type === 'loading' ? <RefreshCw size={12} className="animate-spin" /> : <Server size={12} />}
+                                {lang === 'ca' ? 'Connectar' : 'Conectar'}
                             </button>
                         </div>
+
+                        {/* Share Server Buttons (Visible when confirmed) */}
+                        {connectionStatus.type === 'success' && (
+                            <div className="flex items-center justify-end gap-2 mt-2 px-1">
+                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mr-1">Compartir:</span>
+                                <button
+                                    onClick={() => {
+                                        const text = encodeURIComponent(`${lang === 'ca' ? 'Uneix-te al meu servidor de Llista' : 'Únete a mi servidor de Lista'}: ${tempServerUrl}`);
+                                        window.open(`https://wa.me/?text=${text}`, '_blank');
+                                    }}
+                                    className="p-1.5 bg-white dark:bg-slate-800 text-green-500 rounded-lg border border-slate-100 dark:border-slate-700 hover:bg-green-50 dark:hover:bg-green-900/20 transition shadow-sm"
+                                >
+                                    <MessageCircle size={14} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const text = encodeURIComponent(`${lang === 'ca' ? 'Uneix-te al meu servidor de Llista' : 'Únete a mi servidor de Lista'}: ${tempServerUrl}`);
+                                        window.open(`https://t.me/share/url?url=${encodeURIComponent(tempServerUrl)}&text=${text}`, '_blank');
+                                    }}
+                                    className="p-1.5 bg-white dark:bg-slate-800 text-sky-500 rounded-lg border border-slate-100 dark:border-slate-700 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition shadow-sm"
+                                >
+                                    <Send size={14} />
+                                </button>
+                            </div>
+                        )}
+
                         {connectionStatus.msg && (
                             <p className={`text-[10px] font-bold px-1 flex items-center gap-1 ${connectionStatus.type === 'success' ? 'text-green-500' :
                                 connectionStatus.type === 'error' ? 'text-red-500' : 'text-cyan-500'
@@ -450,6 +490,17 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                 </button>
                                 <button onClick={disconnectSync} className="flex-1 text-xs font-bold text-red-500 bg-white dark:bg-darkSurface border border-red-100 dark:border-red-800/20 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 transition"><LogOut size={12} /> {t.disconnect}</button>
                             </div>
+
+                            {/* Open in App Button (For Web Users on Mobile) */}
+                            {!isNativePlatform() && /Android|iPhone|iPad/i.test(navigator.userAgent) && (
+                                <button
+                                    onClick={() => window.location.href = `shoppinglist://open?server=${encodeURIComponent(window.location.origin)}&c=${sync.code}`}
+                                    className="w-full mt-2 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg flex items-center justify-center gap-2 shadow-lg mb-1"
+                                >
+                                    <Package size={14} />
+                                    {lang === 'ca' ? 'Obrir en l\'App' : 'Abrir en la App'}
+                                </button>
+                            )}
                             {sync.lastSync && (
                                 <p className="text-[10px] text-slate-400 text-center mt-3 lowercase italic">
                                     {lang === 'ca' ? 'Darrera sincronització' : 'Última sincronización'}: {new Date(sync.lastSync).toLocaleTimeString()}
