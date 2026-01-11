@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle, Database, Check, Sun, AlertCircle, Wifi } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, EMOJI_LIST } from '../../data/constants';
@@ -785,6 +785,35 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         </div>
     );
 
+    const [updateAvailable, setUpdateAvailable] = useState<string | null>(null);
+    const [updateUrl, setUpdateUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (activeTab === 'about') {
+            fetch('https://api.github.com/repos/borborborja/shoplist/releases/latest')
+                .then(res => res.json())
+                .then(data => {
+                    const currentVersion = import.meta.env.VITE_APP_VERSION || '0.0.0';
+                    const latestVersion = data.tag_name?.replace('v', '') || '0.0.0';
+
+                    // Simple version comparison (semver-like)
+                    const isNewer = latestVersion.localeCompare(currentVersion, undefined, { numeric: true, sensitivity: 'base' }) > 0;
+
+                    if (isNewer) {
+                        setUpdateAvailable(latestVersion);
+                        // Find the .apk asset
+                        const apkAsset = data.assets?.find((a: any) => a.name.endsWith('.apk'));
+                        if (apkAsset) {
+                            setUpdateUrl(apkAsset.browser_download_url);
+                        } else {
+                            setUpdateUrl(data.html_url); // Fallback to release page
+                        }
+                    }
+                })
+                .catch(err => console.error('Failed to check for updates', err));
+        }
+    }, [activeTab]);
+
     const renderAboutTab = () => (
         <div className="space-y-8 py-4 animate-fade-in flex flex-col items-center text-center">
             <div
@@ -798,6 +827,18 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">ShoppingList</h2>
                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t.aboutDev}</p>
             </div>
+
+            {updateAvailable && updateUrl && (
+                <a
+                    href={updateUrl}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-xl border border-green-200 dark:border-green-800 animate-bounce"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Download size={16} />
+                    <span className="text-xs font-bold">New Version {updateAvailable} Available!</span>
+                </a>
+            )}
 
             <div className="flex flex-col gap-3 w-content">
                 <a

@@ -1,14 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
+    // Dynamic versioning from package.json
+    def nodeConfig = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+    def semver = nodeConfig.version.tokenize('.')
+    def vCode = semver[0].toInteger() * 10000 + semver[1].toInteger() * 100 + semver[2].toInteger()
+
     namespace "com.borja.shoplist"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.borja.shoplist"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode vCode
+        versionName nodeConfig.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

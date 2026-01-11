@@ -158,3 +158,24 @@ This project is designed to evolve from Web to App Store without rewriting the c
 *   **Tech**: React Native or Flutter.
 *   **Strategy**: Rebuild **only** the `client` folder. Keep the Go backend exactly as is.
 
+---
+
+## 🏷️ Versioning Strategy (SemVer)
+
+We follow [Semantic Versioning 2.0.0](https://semver.org) (`MAJOR.MINOR.PATCH`).
+
+1.  **Usage**:
+    *   **Patch** (`1.0.x`): Bug fixes, minor backward-compatible updates.
+    *   **Minor** (`1.x.0`): New features, backward-compatible.
+    *   **Major** (`x.0.0`): Breaking changes.
+
+2.  **Workflow**:
+    *   Update version: `npm version patch` (or minor/major).
+    *   Commit & Tag: `git push && git push --tags`.
+    *   Release: GitHub Actions automatically builds release artifacts based on the tag.
+
+3.  **Android Versioning**:
+    *   **versionName**: Matches `package.json` version (e.g., `1.0.1`).
+    *   **versionCode**: Generated automatically to ensure uniqueness for Google Play.
+
+
