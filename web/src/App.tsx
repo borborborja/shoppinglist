@@ -11,6 +11,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import { useGuestAuth } from './hooks/useGuestAuth';
 import { useListSync } from './hooks/useListSync';
 import { usePresence } from './hooks/usePresence';
+import { useStatusBarSync } from './hooks/useStatusBarSync';
 
 function App() {
   const checkAdmin = () => window.location.hash.startsWith('#/admin') || window.location.pathname.startsWith('/admin');
@@ -24,6 +25,7 @@ function App() {
   const { ensureGuestAuth } = useGuestAuth();
   const { refreshList } = useListSync();
   usePresence(ensureGuestAuth);
+  useStatusBarSync();
 
   // --- Route Handlers ---
   useEffect(() => {
