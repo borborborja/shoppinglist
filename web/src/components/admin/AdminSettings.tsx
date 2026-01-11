@@ -19,6 +19,7 @@ const AdminSettings = () => {
     const [serverName, setServerNameState] = useState('');
     const [enableUsernames, setEnableUsernamesState] = useState(false);
     const [enableRemoteAccess, setEnableRemoteAccessState] = useState(false);
+    const [enableWebApp, setEnableWebAppState] = useState(true);
     const [srvLoading, setSrvLoading] = useState(false);
     const [srvStatus, setSrvStatus] = useState({ msg: '', type: '' });
 
@@ -39,6 +40,9 @@ const AdminSettings = () => {
 
                 const remoteRecord = config.find(c => c.key === 'enable_remote_access');
                 if (remoteRecord) setEnableRemoteAccessState(remoteRecord.value === 'true');
+
+                const webAppRecord = config.find(c => c.key === 'enable_web_app');
+                if (webAppRecord) setEnableWebAppState(webAppRecord.value !== 'false');
             } catch (e) {
                 console.error(e);
             }
@@ -70,6 +74,14 @@ const AdminSettings = () => {
                 await pb.collection('admin_config').update(remoteRecord.id, { value: remoteVal });
             } else {
                 await pb.collection('admin_config').create({ key: 'enable_remote_access', value: remoteVal });
+            }
+
+            const webAppRecord = config.find(c => c.key === 'enable_web_app');
+            const webAppVal = enableWebApp ? 'true' : 'false';
+            if (webAppRecord) {
+                await pb.collection('admin_config').update(webAppRecord.id, { value: webAppVal });
+            } else {
+                await pb.collection('admin_config').create({ key: 'enable_web_app', value: webAppVal });
             }
 
             useShopStore.getState().setServerName(serverName);
@@ -399,6 +411,25 @@ const AdminSettings = () => {
                             />
                         </div>
 
+                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <SettingsIcon size={16} className="text-green-600 dark:text-green-400" />
+                                    <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">Aplicación Web (Pública)</h4>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setEnableWebAppState(!enableWebApp)}
+                                    className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${enableWebApp ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                >
+                                    <div className={`absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${enableWebApp ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-green-700 dark:text-green-300">
+                                🌍 Si se desactiva, la web mostrará un mensaje de "Solo Móvil". La API y Admin seguirán funcionando. Ideal para modo "Backend Only".
+                            </p>
+                        </div>
+
                         {/* Usernames Toggle with Beta Warning */}
                         <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                             <div className="flex items-center justify-between mb-2">
@@ -514,6 +545,22 @@ const AdminSettings = () => {
                     )}
                 </div>
 
+                {/* System Info Card (Version Check) */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3 mb-4 text-slate-600 dark:text-slate-400">
+                        <SettingsIcon size={24} />
+                        <h3 className="font-bold text-lg">Sistema</h3>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-slate-500 uppercase">Versión Actual</span>
+                            <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-200">v{import.meta.env.VITE_APP_VERSION}</span>
+                        </div>
+
+                        <VersionChecker />
+                    </div>
+                </div>
+
                 {/* CATALOG Data Maintenance Card */}
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-3 mb-4 text-amber-600 dark:text-amber-400">
@@ -599,6 +646,56 @@ const AdminSettings = () => {
                     onConfirm={executeImport}
                 />
             )}
+        </div>
+    );
+};
+
+const VersionChecker = () => {
+    const [status, setStatus] = useState<'loading' | 'uptodate' | 'outdated' | 'error'>('loading');
+    const [latest, setLatest] = useState('');
+    const [url, setUrl] = useState('');
+
+    useEffect(() => {
+        const check = async () => {
+            try {
+                const res = await fetch('https://api.github.com/repos/borborborja/shoppinglist/releases/latest');
+                const data = await res.json();
+                const latestRel = data.tag_name?.replace('v', '') || '0.0.0';
+                setLatest(latestRel);
+                setUrl(data.html_url);
+
+                const current = (import.meta.env.VITE_APP_VERSION || '0.0.0').replace('v', '');
+
+                // Simple compare
+                const isNewer = latestRel.localeCompare(current, undefined, { numeric: true, sensitivity: 'base' }) > 0;
+                setStatus(isNewer ? 'outdated' : 'uptodate');
+            } catch (e) {
+                setStatus('error');
+            }
+        };
+        check();
+    }, []);
+
+    if (status === 'loading') return <div className="text-[10px] text-slate-400 flex items-center gap-1"><Loader2 size={10} className="animate-spin" /> Comprobando actualizaciones...</div>;
+
+    if (status === 'error') return <div className="text-[10px] text-red-400">Error comprobando versión (GitHub API).</div>;
+
+    if (status === 'uptodate') return (
+        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800">
+            <Check size={14} />
+            <span className="text-xs font-bold">Sistema Actualizado</span>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
+                <AlertTriangle size={14} />
+                <span className="text-xs font-bold">Nueva versión disponible: v{latest}</span>
+            </div>
+            <a href={url} target="_blank" rel="noopener noreferrer" className="text-center text-[10px] font-bold text-blue-500 hover:underline">
+                Ver en GitHub
+            </a>
         </div>
     );
 };
