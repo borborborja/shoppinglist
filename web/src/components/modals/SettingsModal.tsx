@@ -789,7 +789,7 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     const [updateUrl, setUpdateUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        if (activeTab === 'about') {
+        if (activeTab === 'about' && isNativePlatform()) {
             fetch('https://api.github.com/repos/borborborja/shoppinglist/releases/latest')
                 .then(res => res.json())
                 .then(data => {
