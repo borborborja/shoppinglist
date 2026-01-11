@@ -419,7 +419,8 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                 <div className="flex items-center gap-1">
                                     <button
                                         onClick={() => {
-                                            const text = encodeURIComponent(`¡Únete a mi lista de la compra en ShoppingList!\nCódigo: ${sync.code}\nEnlace directo: ${window.location.origin}/?c=${sync.code}`);
+                                            const baseUrl = isNativePlatform() ? (useShopStore.getState().serverUrl || 'https://shoppinglist.app') : window.location.origin;
+                                            const text = encodeURIComponent(`${t.shareTitle}\n${t.shareBody} ${baseUrl}/?c=${sync.code}`);
                                             window.open(`https://wa.me/?text=${text}`, '_blank');
                                         }}
                                         className="text-slate-400 hover:text-green-500 p-1.5 transition-colors"
@@ -429,8 +430,9 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                                     </button>
                                     <button
                                         onClick={() => {
-                                            const text = encodeURIComponent(`ShoppingList: Lista compartida`);
-                                            const url = encodeURIComponent(`${window.location.origin}/?c=${sync.code}`);
+                                            const baseUrl = isNativePlatform() ? (useShopStore.getState().serverUrl || 'https://shoppinglist.app') : window.location.origin;
+                                            const text = encodeURIComponent(t.shareTitle);
+                                            const url = encodeURIComponent(`${baseUrl}/?c=${sync.code}`);
                                             window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
                                         }}
                                         className="text-slate-400 hover:text-sky-500 p-1.5 transition-colors"

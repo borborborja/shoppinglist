@@ -16,3 +16,5 @@ Thumbs.db
 
 # Go
 bin/
+web/android/keystore.properties
+web/android/app/shoppinglist.jks
