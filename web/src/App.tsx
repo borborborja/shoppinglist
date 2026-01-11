@@ -168,24 +168,11 @@ function App() {
     </div>;
   }
 
-  // Blocking Screen for Web Users if Disabled
+  // Blocking Screen for Web Users if Disabled (Simulate 404)
   if (!isWebAppEnabled && !isAdmin && import.meta.env.VITE_PLATFORM === 'web') {
     return (
-      <div className={`${isDark ? 'dark' : ''} ${isAmoled ? 'amoled' : ''}`}>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-100 dark:border-slate-700">
-            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-            </div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-3">Solo App Móvil</h1>
-            <p className="text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-              La versión web de esta aplicación está desactivada. Este servidor funciona únicamente como backend para las aplicaciones móviles.
-            </p>
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-              <p className="text-xs font-mono text-slate-400">STATUS: API_ONLINE</p>
-            </div>
-          </div>
-        </div>
+      <div style={{ fontFamily: 'sans-serif', textAlign: 'center', padding: '2rem' }}>
+        <h1>404 Not Found</h1>
       </div>
     );
   }
