@@ -43,15 +43,17 @@ const CategoryPickerModal = ({ productName, onClose, onConfirm }: CategoryPicker
             <div className="relative w-full max-w-sm bg-white dark:bg-darkSurface rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh] sm:max-h-[85dvh] animate-pop ring-1 ring-white/10 z-50">
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-md relative">
-                    <h3 className="text-lg font-bold text-white break-words leading-tight">
-                        {t.selectCategory}
-                    </h3>
-                    <p className="text-sm text-blue-200 truncate max-w-[250px]">
-                        {productName}
-                    </p>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 absolute top-1/2 -translate-y-1/2 right-2">
-                        <X size={16} />
+                <div className="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">
+                            {t.selectCategory}
+                        </h3>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 max-w-[250px] truncate">
+                            {productName}
+                        </p>
+                    </div>
+                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <X size={18} />
                     </button>
                 </div>
 
