@@ -155,7 +155,7 @@ const AddItemInput = () => {
 
     return (
         <>
-            <div className="mb-6 relative group z-20">
+            <div className="mb-6 relative group z-30">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
                 <div className="relative flex shadow-lg shadow-indigo-500/5 rounded-xl overflow-hidden bg-white dark:bg-darkSurface transition-colors ring-1 ring-slate-900/5 dark:ring-white/10 h-[52px]">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -184,7 +184,7 @@ const AddItemInput = () => {
                 {showSuggestions && suggestions.length > 0 && (
                     <div
                         ref={dropdownRef}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-darkSurface rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[25] animate-pop"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-darkSurface rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[60] animate-pop"
                     >
                         {suggestions.map((suggestion, idx) => {
                             const style = categoryStyles[suggestion.category] || categoryStyles['other'];
@@ -214,7 +214,7 @@ const AddItemInput = () => {
                 {showSuggestions && val.length >= 2 && suggestions.length === 0 && (
                     <div
                         ref={dropdownRef}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-darkSurface rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-pop"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-darkSurface rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[60] animate-pop"
                     >
                         <div className="px-4 py-3 text-center text-slate-500 dark:text-slate-400 text-sm">
                             {t.noMatches} — <span className="text-blue-500">Enter</span> {t.add.toLowerCase()}

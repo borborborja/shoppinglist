@@ -116,8 +116,8 @@ export function useListSync() {
                 // C. Update Store (Resetting items to server state)
                 syncFromRemote({
                     items: newItems,
-                    categories: listRecord.categories || undefined,
-                    listName: listRecord.listName
+                    categories: listRecord.data?.categories || undefined,
+                    listName: listRecord.data?.listName
                 });
 
                 // D. Subscribe to ITEMS
@@ -160,10 +160,10 @@ export function useListSync() {
                 // E. Subscribe to LIST (Metadata only)
                 await pb.collection('shopping_lists').subscribe(currentRecordId, (e) => {
                     if (e.action === 'update') {
-                        const { categories, listName } = e.record;
+                        const { data } = e.record;
                         useShopStore.setState((state) => ({
-                            categories: categories || state.categories,
-                            listName: listName || state.listName
+                            categories: data?.categories || state.categories,
+                            listName: data?.listName || state.listName
                         }));
                     }
                 });
@@ -195,7 +195,7 @@ export function useListSync() {
             if (str === lastRemoteStateRef.current) return;
 
             try {
-                await pb.collection('shopping_lists').update(currentRecordId, payload);
+                await pb.collection('shopping_lists').update(currentRecordId, { data: payload });
                 lastRemoteStateRef.current = str;
             } catch (e) { console.error("Meta sync fail", e); }
         };

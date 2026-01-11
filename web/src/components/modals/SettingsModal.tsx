@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Server, Moon, Download, Upload, Trash2, Plus, Copy, LogOut, Package, Settings2, Bell, RefreshCw, History, RotateCw, Send, MessageCircle, Database, Check, Sun, AlertCircle, Wifi } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, EMOJI_LIST } from '../../data/constants';
@@ -931,10 +932,13 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         </div>
     );
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="relative w-full max-w-md mx-4 bg-white dark:bg-darkSurface rounded-2xl shadow-2xl flex flex-col h-[85vh] sm:h-[600px] animate-pop ring-1 ring-white/10 overflow-hidden">
+            <div
+                className="relative w-full max-w-md mx-4 bg-white dark:bg-darkSurface rounded-2xl shadow-2xl flex flex-col h-[85vh] sm:h-[600px] animate-pop ring-1 ring-white/10 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header - Fixed */}
                 <div className="flex justify-between items-center p-6 pb-4 shrink-0 z-10 bg-white dark:bg-darkSurface">
                     <h3 className="text-xl font-bold text-slate-800 dark:text-white">{t.settings}</h3>
@@ -973,7 +977,8 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                     {activeTab === 'about' && renderAboutTab()}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
