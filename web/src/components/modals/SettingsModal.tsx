@@ -166,8 +166,12 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                 return;
             }
 
-            // If no conflict, just sync (if remote has data, use it; otherwise keep local)
-            finishConnection(record.id, code, (remoteData.items?.length || 0) > 0 ? remoteData : { items, categories, listName: listName || undefined });
+            // If no conflict, just sync. Prioritize remote metadata (name/cats) even if items are empty (Atomic lists)
+            finishConnection(record.id, code, {
+                items: (remoteData.items?.length || 0) > 0 ? remoteData.items : items,
+                categories: remoteData.categories || categories,
+                listName: remoteData.listName || listName
+            });
         } catch (err: any) {
             console.error(err);
             disconnectSync();
