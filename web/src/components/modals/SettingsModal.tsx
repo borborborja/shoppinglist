@@ -167,8 +167,12 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
             }
 
             // If no conflict, just sync (if remote has data, use it; otherwise keep local)
-            finishConnection(record.id, code, remoteData.items.length > 0 ? remoteData : { items, categories, listName: listName || undefined });
-        } catch { disconnectSync(); setSyncState({ msg: 'Code not found', msgType: 'error' }); }
+            finishConnection(record.id, code, (remoteData.items?.length || 0) > 0 ? remoteData : { items, categories, listName: listName || undefined });
+        } catch (err) {
+            console.error(err);
+            disconnectSync();
+            setSyncState({ msg: 'Code not found', msgType: 'error' });
+        }
     };
 
     const handleSyncChoice = (choice: 'merge' | 'replace') => {
