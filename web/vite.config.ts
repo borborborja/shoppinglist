@@ -38,6 +38,6 @@ export default defineConfig({
     })
   ],
   define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify('1.0.10')
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify('1.0.11')
   }
 })

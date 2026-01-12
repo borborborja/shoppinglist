@@ -310,18 +310,18 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                         <h4 className="text-xs font-bold text-cyan-500 uppercase mb-3 tracking-wider flex items-center gap-2">
                             <Wifi size={12} /> Servidor Remoto
                         </h4>
-                        <div className="flex gap-2 mb-2">
+                        <div className="flex flex-col sm:flex-row gap-2 mb-2">
                             <input
                                 type="url"
                                 value={tempServerUrl}
                                 onChange={(e) => setTempServerUrl(e.target.value)}
                                 placeholder="https://tu-servidor.com"
-                                className="flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none dark:text-white font-mono"
+                                className="w-full sm:flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none dark:text-white font-mono"
                             />
                             <button
                                 onClick={testConnection}
                                 disabled={connectionStatus.type === 'loading'}
-                                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 disabled:opacity-50"
+                                className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50 shrink-0"
                             >
                                 {connectionStatus.type === 'loading' ? <RefreshCw size={12} className="animate-spin" /> : <Server size={12} />}
                                 {lang === 'ca' ? 'Connectar' : 'Conectar'}

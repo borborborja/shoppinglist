@@ -10,6 +10,11 @@ export const useStatusBarSync = () => {
         const syncStatusBar = async () => {
             if (!Capacitor.isNativePlatform()) return;
 
+            // Ensure content doesn't go under status bar on Android
+            if (Capacitor.getPlatform() === 'android') {
+                await StatusBar.setOverlaysWebView({ overlay: false });
+            }
+
             try {
                 if (isAmoled) {
                     // Pure Black
