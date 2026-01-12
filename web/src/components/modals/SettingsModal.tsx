@@ -152,8 +152,9 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
     const [pendingSyncRecord, setPendingSyncRecord] = useState<{ id: string; code: string; data: { items: any[]; categories: any; listName?: string } } | null>(null);
 
     // --- Sync Logic ---
-    const connectSync = async (code: string) => {
+    const connectSync = async (codeInput: string) => {
         if (!navigator.onLine) return;
+        const code = codeInput.trim().toUpperCase();
         setSyncState({ msg: 'Connecting...', msgType: 'info' });
         try {
             const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${code}"`);
@@ -511,28 +512,36 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                     ) : null}
 
                     {/* History - Always visible if there are codes beyond the current one */}
-                    {sync.syncHistory && sync.syncHistory.filter(c => c !== sync.code).length > 0 && (
+                    {sync.syncHistory && sync.syncHistory.filter(c => (typeof c === 'string' ? c : c.code) !== sync.code).length > 0 && (
                         <div className="mt-4 pt-4 border-t border-blue-100 dark:border-blue-800/20">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1">
                                 <History size={10} /> {t.syncHistory}
                             </p>
                             <div className="flex flex-col gap-2">
-                                {sync.syncHistory.filter(c => c !== sync.code).map(code => (
-                                    <button
-                                        key={code}
-                                        onClick={() => {
-                                            setSyncInputCode(code);
-                                            connectSync(code);
-                                        }}
-                                        disabled={!canSync}
-                                        className="w-full flex items-center justify-between px-3 py-2 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition group disabled:opacity-50"
-                                    >
-                                        <span className="tracking-widest uppercase">{code}</span>
-                                        <span className="text-[9px] font-sans text-blue-500 opacity-0 group-hover:opacity-100 transition uppercase tracking-tighter">
-                                            {t.join}
-                                        </span>
-                                    </button>
-                                ))}
+                                {sync.syncHistory.filter(c => (typeof c === 'string' ? c : c.code) !== sync.code).map(item => {
+                                    const code = typeof item === 'string' ? item : item.code;
+                                    const title = typeof item === 'object' ? item.title : undefined;
+
+                                    return (
+                                        <button
+                                            key={code}
+                                            onClick={() => {
+                                                setSyncInputCode(code);
+                                                connectSync(code);
+                                            }}
+                                            disabled={!canSync}
+                                            className="w-full flex items-center justify-between px-3 py-2 bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition group disabled:opacity-50"
+                                        >
+                                            <div className="flex flex-col items-start">
+                                                <span className="tracking-widest uppercase">{code}</span>
+                                                {title && <span className="text-[9px] text-slate-400 font-sans normal-case truncate max-w-[150px]">{title}</span>}
+                                            </div>
+                                            <span className="text-[9px] font-sans text-blue-500 opacity-0 group-hover:opacity-100 transition uppercase tracking-tighter">
+                                                {t.join}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

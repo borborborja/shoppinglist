@@ -4,13 +4,19 @@ import type { ShopItem, Categories, Lang, AppMode, ViewMode, LocalizedItem, Auth
 import { defaultCategories } from '../data/constants';
 import { pb } from '../lib/pocketbase';
 
+interface SyncHistoryItem {
+    code: string;
+    title?: string;
+    lastUsed: number;
+}
+
 interface SyncState {
     connected: boolean;
     code: string | null;
     recordId: string | null;
     msg: string;
     msgType: 'info' | 'success' | 'error';
-    syncHistory: string[];
+    syncHistory: SyncHistoryItem[];
     lastSync: number | null;
     syncVersion: number;
     lastLocalInteraction: number;
@@ -344,7 +350,14 @@ export const useShopStore = create<ShopState>()(
             setActiveUsers: (activeUsers) => set({ activeUsers }),
             logout: () => set({ auth: { isLoggedIn: false, email: null, userId: null, username: null } }),
             addToSyncHistory: (code: string) => set((state) => {
-                const history = [code, ...state.sync.syncHistory.filter(c => c !== code)].slice(0, 3);
+                const title = state.listName || undefined;
+                // Remove existing entry for this code if present
+                const filtered = state.sync.syncHistory.filter(h => typeof h === 'string' ? h !== code : h.code !== code);
+
+                // Add new entry at top
+                const newEntry = { code, title, lastUsed: Date.now() };
+                const history = [newEntry, ...filtered].slice(0, 5);
+
                 return { sync: { ...state.sync, syncHistory: history } };
             }),
 
@@ -425,7 +438,7 @@ export const useShopStore = create<ShopState>()(
                     recordId: state.sync.recordId,
                     msg: '',
                     msgType: 'info' as const,
-                    syncHistory: state.sync.syncHistory,
+                    syncHistory: state.sync.syncHistory.map(h => typeof h === 'string' ? { code: h, lastUsed: Date.now() } : h),
                     lastSync: state.sync.lastSync,
                     syncVersion: 0,
                     lastLocalInteraction: 0

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useShopStore } from './store/shopStore';
+import { Capacitor } from '@capacitor/core';
 import Header from './components/layout/Header';
 // Footer removed
 import PlanningView from './components/views/PlanningView';
@@ -193,10 +194,14 @@ function App() {
   const [isWebAppEnabled, setIsWebAppEnabled] = useState(true);
   const [isConfigLoaded, setIsConfigLoaded] = useState(false);
 
+
+
   useEffect(() => {
+    let unsub: (() => void) | undefined;
+
     const checkConfig = async () => {
       // First check if we are in native platform - if so, always enabled
-      if (import.meta.env.VITE_PLATFORM !== 'web') {
+      if (Capacitor.getPlatform() !== 'web') {
         setIsConfigLoaded(true);
         return;
       }
@@ -208,15 +213,26 @@ function App() {
       }
 
       try {
-        // We import pb dynamically or from lib to avoid circular deps if any, but import is safe here
-        // Using a fail-safe fetch since this blocks the app
         const { pb } = await import('./lib/pocketbase');
-        const config = await pb.collection('admin_config').getFullList();
-        const enabledRecord = config.find(c => c.key === 'enable_web_app');
 
-        // Default to true if not found or error
-        const isEnabled = enabledRecord ? enabledRecord.value !== 'false' : true;
-        setIsWebAppEnabled(isEnabled);
+        // Initial fetch
+        const config = await pb.collection('admin_config').getFullList();
+        const updateState = (records: any[]) => {
+          const enabledRecord = records.find((c: any) => c.key === 'enable_web_app');
+          const isEnabled = enabledRecord ? enabledRecord.value !== 'false' : true;
+          setIsWebAppEnabled(isEnabled);
+        };
+        updateState(config);
+
+        // Real-time subscription
+        pb.collection('admin_config').subscribe('*', async (e) => {
+          // Reload all config to be safe/simple, or just check event
+          if (e.action === 'update' || e.action === 'create') {
+            const newConfig = await pb.collection('admin_config').getFullList();
+            updateState(newConfig);
+          }
+        }).then(u => unsub = u);
+
       } catch (e) {
         console.warn('Failed to fetch config, assuming enabled', e);
       } finally {
@@ -225,9 +241,13 @@ function App() {
     };
 
     checkConfig();
+
+    return () => {
+      if (unsub) unsub();
+    };
   }, [isAdmin]); // Re-run if admin status changes
 
-  if (!isConfigLoaded && !isAdmin && import.meta.env.VITE_PLATFORM === 'web') {
+  if (!isConfigLoaded && !isAdmin && Capacitor.getPlatform() === 'web') {
     // Optional: Render simple loading or just wait (to avoid flash)
     // For now we render nothing or a spinner if preferred, but existing app skeleton is fine.
     // To avoid layout shift, let's just let it fall through to render but maybe show a skeleton?
@@ -238,7 +258,7 @@ function App() {
   }
 
   // Blocking Screen for Web Users if Disabled (Simulate 404)
-  if (!isWebAppEnabled && !isAdmin && import.meta.env.VITE_PLATFORM === 'web') {
+  if (!isWebAppEnabled && !isAdmin && Capacitor.getPlatform() === 'web') {
     return (
       <div style={{ fontFamily: 'sans-serif', textAlign: 'center', padding: '2rem' }}>
         <h1>404 Not Found</h1>

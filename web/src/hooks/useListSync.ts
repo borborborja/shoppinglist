@@ -161,10 +161,24 @@ export function useListSync() {
                 await pb.collection('shopping_lists').subscribe(currentRecordId, (e) => {
                     if (e.action === 'update') {
                         const { data } = e.record;
-                        useShopStore.setState((state) => ({
-                            categories: data?.categories || state.categories,
-                            listName: data?.listName || state.listName
-                        }));
+                        if (!data) return;
+
+                        // Update store
+                        useShopStore.setState((state) => {
+                            const newCategories = data.categories || state.categories;
+                            // Use data.listName if it exists (even if null), otherwise fallback to state
+                            const newListName = data.listName !== undefined ? data.listName : state.listName;
+
+                            // Prevent valid updates from triggering an echo back to server
+                            // We construct the payload that we expect the effect would have generated
+                            const payload = { categories: newCategories, listName: newListName };
+                            lastRemoteStateRef.current = JSON.stringify(payload);
+
+                            return {
+                                categories: newCategories,
+                                listName: newListName
+                            };
+                        });
                     }
                 });
 
