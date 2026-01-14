@@ -489,13 +489,41 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
                     )}
 
                     {!sync.connected && !pendingSyncRecord ? (
-                        <div>
-                            <button onClick={createSharedList} disabled={!canSync} className="w-full mb-3 bg-white dark:bg-darkSurface border border-blue-200 dark:border-blue-700 text-blue-600 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"><Plus size={12} /> {t.createList}</button>
-                            <div className="flex gap-2 mb-3">
-                                <input type="text" value={syncInputCode} onChange={(e) => setSyncInputCode(e.target.value)} disabled={!canSync} placeholder="CODE..." className="flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-xs focus:outline-none dark:text-white uppercase tracking-widest font-mono text-center disabled:opacity-50" />
-                                <button onClick={() => connectSync(syncInputCode.toUpperCase())} disabled={!canSync} className="bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs disabled:opacity-50">{t.join}</button>
+                        sync.code ? (
+                            <div className="animate-fade-in">
+                                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl text-center">
+                                    <h5 className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">
+                                        {lang === 'ca' ? 'Desconnectat de la llista' : 'Desconectado de la lista'}
+                                    </h5>
+                                    <p className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 tracking-widest bg-white dark:bg-slate-900 px-2 py-1 rounded mx-auto w-fit mb-3 border border-blue-100 dark:border-blue-800 select-all">
+                                        {sync.code}
+                                    </p>
+
+                                    <button
+                                        onClick={() => connectSync(sync.code!)}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-sm mb-3"
+                                    >
+                                        <RefreshCw size={16} />
+                                        {lang === 'ca' ? 'Reconnectar' : 'Reconectar'}
+                                    </button>
+
+                                    <button
+                                        onClick={disconnectSync}
+                                        className="text-xs text-slate-400 hover:text-red-500 font-bold underline decoration-slate-300 hover:decoration-red-300 underline-offset-4 transition-colors"
+                                    >
+                                        {lang === 'ca' ? 'Canviar de llista / Crear nova' : 'Cambiar de lista / Crear nueva'}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div>
+                                <button onClick={createSharedList} disabled={!canSync} className="w-full mb-3 bg-white dark:bg-darkSurface border border-blue-200 dark:border-blue-700 text-blue-600 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"><Plus size={12} /> {t.createList}</button>
+                                <div className="flex gap-2 mb-3">
+                                    <input type="text" value={syncInputCode} onChange={(e) => setSyncInputCode(e.target.value)} disabled={!canSync} placeholder="CODE..." className="flex-grow bg-white dark:bg-darkSurface border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-xs focus:outline-none dark:text-white uppercase tracking-widest font-mono text-center disabled:opacity-50" />
+                                    <button onClick={() => connectSync(syncInputCode.toUpperCase())} disabled={!canSync} className="bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs disabled:opacity-50">{t.join}</button>
+                                </div>
+                            </div>
+                        )
                     ) : sync.connected ? (
                         <div>
                             <div className="flex items-center justify-between mb-3 bg-white dark:bg-darkSurface p-2.5 rounded-xl border border-blue-200 dark:border-blue-800/30">

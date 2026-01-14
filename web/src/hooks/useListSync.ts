@@ -258,7 +258,25 @@ export function useListSync() {
         return () => clearTimeout(t);
     }, [categories, listName, sync.connected, sync.recordId]);
 
-    return { refreshList: () => { } };
+    return {
+        refreshList: async () => {
+            const state = useShopStore.getState();
+            // If already connected, do nothing (or maybe verifying validity? For now, we assume connected is true)
+            if (state.sync.connected) return;
+
+            // If we have a code and are online, try to reconnect
+            if (state.sync.code && navigator.onLine) {
+                console.log("Auto-reconnecting via refreshList...");
+                try {
+                    const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${state.sync.code}"`);
+                    setSyncState({ connected: true, recordId: record.id, msg: 'Reconnected', msgType: 'success' });
+                    // Effect 2 will handle the rest (atomic sync)
+                } catch (e) {
+                    console.error('Auto-reconnect failed (refreshList):', e);
+                }
+            }
+        }
+    };
 }
 
 function handleNotifications(localItems: any[], remoteItems: any[], notifyOnAdd: boolean, notifyOnCheck: boolean, lang: string) {
