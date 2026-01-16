@@ -10,7 +10,7 @@ const getServerUrl = (): string => {
     // For native apps, use configured server URL from localStorage (persisted by Zustand)
     if (isNativePlatform()) {
         try {
-            const stored = localStorage.getItem('shop-storage');
+            const stored = localStorage.getItem('shoplist-storage');
             if (stored) {
                 const parsed = JSON.parse(stored);
                 if (parsed.state?.serverUrl) {

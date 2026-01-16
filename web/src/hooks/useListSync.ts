@@ -74,7 +74,7 @@ export function useListSync() {
             }
 
             // Case B: Auto-reconnect
-            if (!sync.connected && sync.code) {
+            if (!sync.connected && sync.code && navigator.onLine) {
                 try {
                     const record = await pb.collection('shopping_lists').getFirstListItem(`list_code="${sync.code}"`);
                     setSyncState({ connected: true, recordId: record.id, msg: 'Reconnected', msgType: 'success' });
