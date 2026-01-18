@@ -42,6 +42,10 @@ interface ShopState {
     sortOrder: 'category' | 'alpha';
     showCompletedInline: boolean;
 
+    // Auto-clear state
+    autoClearScheduled: number | null;  // timestamp when scheduled
+    autoClearMinutes: number;           // minutes to wait (default 60)
+
     // Sync & Auth
     sync: SyncState;
     auth: AuthState;
@@ -69,14 +73,19 @@ interface ShopState {
     deleteItem: (id: string) => void;
     updateItemNote: (id: string, note: string) => void;
     clearCompleted: () => void;
+    removeFromList: (id: string) => void;
+    addBackToList: (id: string) => void;
+    clearPreviouslyUsed: () => void;
+    scheduleAutoClear: () => void;
+    cancelAutoClear: () => void;
 
-    addCategoryItem: (catKey: string, name: LocalizedItem) => void;
-    removeCategoryItem: (catKey: string, idx: number) => void;
+    addCategoryItem: (catKey: string, name: LocalizedItem) => Promise<void>;
+    removeCategoryItem: (catKey: string, idx: number) => Promise<void>;
     setListName: (name: string | null) => void;
 
     // Category Management
-    addCategory: (key: string, icon: string) => void;
-    removeCategory: (key: string) => void;
+    addCategory: (key: string, icon: string) => Promise<void>;
+    removeCategory: (key: string) => Promise<void>;
 
     // Sync Actions
     setSyncState: (s: Partial<SyncState>) => void;
@@ -86,6 +95,7 @@ interface ShopState {
     addToSyncHistory: (code: string) => void;
     removeFromSyncHistory: (code: string) => void;
     loadCatalog: () => Promise<void>;
+    loadListCustomData: () => Promise<void>;
 
     // Auth Actions
     setAuth: (auth: Partial<AuthState>) => void;
@@ -116,6 +126,8 @@ export const useShopStore = create<ShopState>()(
             serverUrl: '',
             sortOrder: 'category',
             showCompletedInline: false,
+            autoClearScheduled: null,
+            autoClearMinutes: 60,
 
             setLang: (lang) => set({ lang }),
             setServerName: (serverName) => set({ serverName }),
@@ -181,6 +193,7 @@ export const useShopStore = create<ShopState>()(
                         checked: false,
                         note: '',
                         category: cat,
+                        inList: true,
                         // updatedAt is now server managed, but we keep it for local sorting/logic if needed
                         updatedAt: Date.now()
                     }, ...items]
@@ -303,41 +316,181 @@ export const useShopStore = create<ShopState>()(
                 }
             },
 
+            // Planner mode: remove from active list (move to "previously used")
+            removeFromList: async (id) => {
+                const { sync, items } = get();
+
+                // 1. Optimistic: mark as not in list
+                set({
+                    items: items.map(i => i.id === id ? { ...i, inList: false, checked: false, updatedAt: Date.now() } : i),
+                    sync: { ...sync, lastLocalInteraction: Date.now() }
+                });
+
+                // 2. Network: update inList field
+                if (sync.connected && !id.startsWith('local_')) {
+                    try {
+                        await pb.collection('shopping_items').update(id, { in_list: false, checked: false });
+                    } catch (e) {
+                        console.error("Failed to remove from list", e);
+                    }
+                }
+            },
+
+            // Planner mode: add back to active list from "previously used"
+            addBackToList: async (id) => {
+                const { sync, items } = get();
+
+                // 1. Optimistic
+                set({
+                    items: items.map(i => i.id === id ? { ...i, inList: true, checked: false, updatedAt: Date.now() } : i),
+                    sync: { ...sync, lastLocalInteraction: Date.now() }
+                });
+
+                // 2. Network
+                if (sync.connected && !id.startsWith('local_')) {
+                    try {
+                        await pb.collection('shopping_items').update(id, { in_list: true, checked: false });
+                    } catch (e) {
+                        console.error("Failed to add back to list", e);
+                    }
+                }
+            },
+
+            // Clear previously used items (permanent delete)
+            clearPreviouslyUsed: async () => {
+                const { sync, items } = get();
+                const previouslyUsed = items.filter(i => i.inList === false);
+
+                // 1. Optimistic
+                set({
+                    items: items.filter(i => i.inList !== false),
+                    sync: { ...sync, lastLocalInteraction: Date.now() }
+                });
+
+                // 2. Network
+                if (sync.connected) {
+                    for (const item of previouslyUsed) {
+                        if (!item.id.startsWith('local_')) {
+                            try {
+                                await pb.collection('shopping_items').delete(item.id);
+                            } catch (e) { console.error("Failed to delete previously used", item.id); }
+                        }
+                    }
+                }
+            },
+
+            // Schedule auto-clear of completed items (shopping mode)
+            scheduleAutoClear: () => set({ autoClearScheduled: Date.now() }),
+
+            // Cancel auto-clear
+            cancelAutoClear: () => set({ autoClearScheduled: null }),
+
+
             setListName: (listName) => set((state) => ({
                 listName,
                 sync: { ...state.sync, lastLocalInteraction: Date.now() }
             })),
 
-            addCategoryItem: (catKey, item) => set((state) => {
-                const cats = { ...state.categories };
+            addCategoryItem: async (catKey, item) => {
+                const { sync, categories } = get();
+                const itemName = typeof item === 'string' ? item : (item.es || item.ca || item.en || '');
+
+                // 1. Optimistic update
+                const cats = { ...categories };
                 if (cats[catKey]) {
                     cats[catKey].items = [...cats[catKey].items, item];
                 }
-                return { categories: cats };
-            }),
-            removeCategoryItem: (catKey, idx) => set((state) => {
-                const cats = { ...state.categories };
+                set({ categories: cats });
+
+                // 2. Sync to server if connected
+                if (sync.connected && sync.recordId) {
+                    try {
+                        await pb.collection('list_items').create({
+                            list: sync.recordId,
+                            category_key: catKey,
+                            name: itemName
+                        });
+                    } catch (e) {
+                        console.error("Failed to sync category item", e);
+                    }
+                }
+            },
+            removeCategoryItem: async (catKey, idx) => {
+                const { sync, categories } = get();
+                const itemToRemove = categories[catKey]?.items[idx];
+                const itemName = typeof itemToRemove === 'string' ? itemToRemove : (itemToRemove?.es || itemToRemove?.ca || itemToRemove?.en || '');
+
+                // 1. Optimistic update
+                const cats = { ...categories };
                 if (cats[catKey]) {
                     const newItems = [...cats[catKey].items];
                     newItems.splice(idx, 1);
                     cats[catKey].items = newItems;
                 }
-                return { categories: cats };
-            }),
+                set({ categories: cats });
+
+                // 2. Sync to server - find and delete by name
+                if (sync.connected && sync.recordId && itemName) {
+                    try {
+                        const records = await pb.collection('list_items').getFullList({
+                            filter: `list = "${sync.recordId}" && category_key = "${catKey}" && name = "${itemName}"`
+                        });
+                        if (records.length > 0) {
+                            await pb.collection('list_items').delete(records[0].id);
+                        }
+                    } catch (e) {
+                        console.error("Failed to delete category item from server", e);
+                    }
+                }
+            },
 
             // Category Management
-            addCategory: (key, icon) => set((state) => {
-                const cats = { ...state.categories };
+            addCategory: async (key, icon) => {
+                const { sync, categories } = get();
+
+                // 1. Optimistic update
+                const cats = { ...categories };
                 if (!cats[key]) {
                     cats[key] = { icon, items: [] };
                 }
-                return { categories: cats };
-            }),
-            removeCategory: (key) => set((state) => {
-                const cats = { ...state.categories };
+                set({ categories: cats });
+
+                // 2. Sync to server if connected
+                if (sync.connected && sync.recordId) {
+                    try {
+                        await pb.collection('list_categories').create({
+                            list: sync.recordId,
+                            key: key,
+                            icon: icon,
+                            name: key
+                        });
+                    } catch (e) {
+                        console.error("Failed to sync category", e);
+                    }
+                }
+            },
+            removeCategory: async (key) => {
+                const { sync, categories } = get();
+
+                // 1. Optimistic update
+                const cats = { ...categories };
                 delete cats[key];
-                return { categories: cats };
-            }),
+                set({ categories: cats });
+
+                // 2. Sync to server - find and delete
+                if (sync.connected && sync.recordId) {
+                    try {
+                        const records = await pb.collection('list_categories').getFullList({
+                            filter: `list = "${sync.recordId}" && key = "${key}"`
+                        });
+                        if (records.length > 0) {
+                            await pb.collection('list_categories').delete(records[0].id);
+                        }
+                    } catch (e) {
+                        console.error("Failed to delete category from server", e);
+                    }
+                }
+            },
 
             setSyncState: (s) => set((state) => ({ sync: { ...state.sync, ...s } })),
             syncFromRemote: (data) => set({ items: data.items, categories: data.categories || defaultCategories, listName: data.listName || null }),
@@ -413,6 +566,55 @@ export const useShopStore = create<ShopState>()(
                     }
                 } catch (e) {
                     console.error("Failed to load catalog", e);
+                }
+            },
+
+            loadListCustomData: async () => {
+                const { sync, categories } = get();
+                if (!sync.connected || !sync.recordId) return;
+
+                try {
+                    // Load custom categories for this list
+                    const customCats = await pb.collection('list_categories').getFullList({
+                        filter: `list = "${sync.recordId}"`
+                    });
+
+                    // Load custom items for this list
+                    const customItems = await pb.collection('list_items').getFullList({
+                        filter: `list = "${sync.recordId}"`
+                    });
+
+                    // Merge with existing categories
+                    const mergedCats = { ...categories };
+
+                    customCats.forEach((c: any) => {
+                        if (!mergedCats[c.key]) {
+                            mergedCats[c.key] = {
+                                icon: c.icon,
+                                items: [],
+                                color: undefined
+                            };
+                        }
+                    });
+
+                    // Add custom items to their categories
+                    customItems.forEach((i: any) => {
+                        if (mergedCats[i.category_key]) {
+                            // Check if item already exists to avoid duplicates
+                            const exists = mergedCats[i.category_key].items.some(item => {
+                                if (typeof item === 'string') return item === i.name;
+                                return item.es === i.name || item.ca === i.name || item.en === i.name;
+                            });
+                            if (!exists) {
+                                mergedCats[i.category_key].items.push(i.name);
+                            }
+                        }
+                    });
+
+                    set({ categories: mergedCats });
+                    console.log("Loaded list custom data:", customCats.length, "categories,", customItems.length, "items");
+                } catch (e) {
+                    console.error("Failed to load list custom data", e);
                 }
             }
         }),

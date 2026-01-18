@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Tag, Settings as SettingsIcon, LogOut, List, Sun, Moon, Users, AlertTriangle } from 'lucide-react';
+import { Package, Tag, Settings as SettingsIcon, LogOut, List, Sun, Moon, Users, AlertTriangle, Lightbulb } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations } from '../../data/constants';
 import { pb } from '../../lib/pocketbase';
@@ -8,13 +8,14 @@ import ProductManager from './ProductManager';
 import AdminSettings from './AdminSettings';
 import ListsManager from './ListsManager';
 import UsersManager from './UsersManager';
+import UserSuggestionsManager from './UserSuggestionsManager';
 
 interface AdminDashboardProps {
     onLogout: () => void;
 }
 
 const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
-    const [activeTab, setActiveTab] = useState<'lists' | 'users' | 'categories' | 'products' | 'settings'>('lists');
+    const [activeTab, setActiveTab] = useState<'lists' | 'users' | 'categories' | 'products' | 'suggestions' | 'settings'>('lists');
     const [isDefaultPassword, setIsDefaultPassword] = useState(false);
     const { isDark, toggleTheme, lang, setLang } = useShopStore();
     const t = translations[lang] as any;
@@ -119,6 +120,15 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 <Package size={16} /> {t.tabProducts}
             </button>
             <button
+                onClick={() => setActiveTab('suggestions')}
+                className={`px-4 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'suggestions'
+                    ? 'border-green-500 text-green-600 dark:text-green-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    }`}
+            >
+                <Lightbulb size={16} /> {t.tabSuggestions || 'Sugerencias'}
+            </button>
+            <button
                 onClick={() => setActiveTab('settings')}
                 className={`px-4 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'settings'
                     ? 'border-blue-500 text-blue-600 dark:text-blue-400'
@@ -164,6 +174,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 {activeTab === 'users' && <UsersManager />}
                 {activeTab === 'categories' && <CategoryManager />}
                 {activeTab === 'products' && <ProductManager />}
+                {activeTab === 'suggestions' && <UserSuggestionsManager />}
                 {activeTab === 'settings' && <AdminSettings />}
             </main>
         </div>

@@ -22,6 +22,7 @@ export interface ShopItem {
     note: string;
     category: string;
     updatedAt?: number;
+    inList?: boolean;  // true = en lista activa, false/undefined = en "utilizados anteriormente"
 }
 
 export type AppMode = 'planning' | 'shopping';

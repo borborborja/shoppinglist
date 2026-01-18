@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, Trash2, List, LayoutGrid, AlignJustify, StickyNote, ShoppingBasket, Pen, MoreHorizontal, Filter } from 'lucide-react';
+import { Check, Trash2, List, LayoutGrid, AlignJustify, StickyNote, ShoppingBasket, Pen, MoreHorizontal, Filter, Clock, RotateCcw, X } from 'lucide-react';
 import { useShopStore } from '../../store/shopStore';
 import { translations, categoryStyles, defaultCategories } from '../../data/constants';
 import type { ShopItem } from '../../types';
@@ -7,7 +7,7 @@ import ProductModal from '../modals/ProductModal';
 import { triggerHaptic } from '../../utils/haptics';
 
 const ListView = () => {
-    const { items, categories, lang, viewMode, appMode, setViewMode, toggleCheck, deleteItem, clearCompleted, sync, activeUsers, sortOrder, setSortOrder, showCompletedInline, setShowCompletedInline, listName, setListName } = useShopStore();
+    const { items, categories, lang, viewMode, appMode, setViewMode, toggleCheck, clearCompleted, removeFromList, addBackToList, clearPreviouslyUsed, scheduleAutoClear, cancelAutoClear, autoClearScheduled, autoClearMinutes, sync, activeUsers, sortOrder, setSortOrder, showCompletedInline, setShowCompletedInline, listName, setListName } = useShopStore();
     const t = translations[lang];
     const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
     const [showOptions, setShowOptions] = useState(false);
@@ -35,11 +35,71 @@ const ListView = () => {
         }
     }, [isRenaming]);
 
-    // Computed
-    const completedItems = items.filter(i => i.checked).sort((a, b) => a.name.localeCompare(b.name));
+    // Auto-clear countdown state
+    const [autoClearTimeLeft, setAutoClearTimeLeft] = useState<number | null>(null);
 
-    // itemsToShow: if inline, all items. if not inline, only active items.
-    const itemsToShow = showCompletedInline ? items : items.filter(i => !i.checked);
+    // Auto-clear timer effect
+    useEffect(() => {
+        if (!autoClearScheduled) {
+            setAutoClearTimeLeft(null);
+            return;
+        }
+
+        const updateTimeLeft = () => {
+            const elapsed = Date.now() - autoClearScheduled;
+            const totalMs = autoClearMinutes * 60 * 1000;
+            const remaining = Math.max(0, totalMs - elapsed);
+
+            if (remaining <= 0) {
+                // Get functions from store directly to avoid stale closures
+                const store = useShopStore.getState();
+                store.clearCompleted();
+                store.cancelAutoClear();
+                setAutoClearTimeLeft(null);
+            } else {
+                setAutoClearTimeLeft(Math.ceil(remaining / 1000));
+            }
+        };
+
+        updateTimeLeft();
+        const interval = setInterval(updateTimeLeft, 1000);
+        return () => clearInterval(interval);
+    }, [autoClearScheduled, autoClearMinutes]);
+
+    // Format time for display
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Computed items - different logic for planner vs shopping
+    // Planner mode: inList=true are "active", inList=false are "previously used"
+    // Shopping mode: checked=false are "active", checked=true are "completed"
+
+    // For planner: "previously used" items (inList === false)
+    const previouslyUsedItems = items.filter(i => i.inList === false).sort((a, b) => a.name.localeCompare(b.name));
+
+    // For shopping: completed items (checked = true)
+    const completedItems = items.filter(i => i.checked && i.inList !== false).sort((a, b) => a.name.localeCompare(b.name));
+
+    // Active items to show (depends on mode)
+    // Planner: show items that are inList (or undefined/true - backwards compatible)
+    // Shopping: show items that are not checked (and in list)
+    const getActiveItems = () => {
+        if (appMode === 'planning') {
+            // In planner, active = inList !== false (true or undefined)
+            return items.filter(i => i.inList !== false);
+        } else {
+            // In shopping, active = not checked AND inList !== false
+            if (showCompletedInline) {
+                return items.filter(i => i.inList !== false);
+            }
+            return items.filter(i => !i.checked && i.inList !== false);
+        }
+    };
+
+    const itemsToShow = getActiveItems();
 
     const itemsSorted = sortOrder === 'alpha'
         ? [...itemsToShow].sort((a, b) => a.name.localeCompare(b.name))
@@ -80,11 +140,7 @@ const ListView = () => {
         return '';
     };
 
-    const handleDelete = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        deleteItem(id);
-        triggerHaptic(20);
-    };
+
 
     const handleRenameSubmit = () => {
         if (!renameInputRef.current) return;
@@ -110,7 +166,7 @@ const ListView = () => {
         appMode,
         toggleCheck,
         setEditingItem,
-        handleDelete,
+        handleRemoveFromList,
         getItemClass
     }: {
         item: ShopItem,
@@ -119,35 +175,56 @@ const ListView = () => {
         appMode: string,
         toggleCheck: (id: string) => void,
         setEditingItem: (item: ShopItem) => void,
-        handleDelete: (id: string, e: React.MouseEvent) => void,
+        handleRemoveFromList: (id: string, e: React.MouseEvent) => void,
         getItemClass: () => string
     }) => {
+        // In planner mode: no click action on card (use buttons)
+        // In shopping mode: click toggles check
         const handleOnClick = () => {
-            toggleCheck(item.id);
-            triggerHaptic(20);
+            if (appMode === 'shopping') {
+                toggleCheck(item.id);
+                triggerHaptic(20);
+            }
         };
+
+        // In planner mode, we don't show checkbox - we show trash icon on the left
+        const isPlannerMode = appMode === 'planning';
 
         return (
             <div
                 onClick={handleOnClick}
-                className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] select-none ${getItemClass()} ${item.checked
+                className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden ${appMode === 'shopping' ? 'cursor-pointer' : ''} active:scale-[0.99] select-none ${getItemClass()} ${item.checked && !isPlannerMode
                     ? 'bg-slate-50 dark:bg-slate-800/40 border-transparent grayscale'
                     : 'bg-white dark:bg-darkSurface border-slate-100 dark:border-slate-700/50 hover:shadow-md'}`}
             >
-                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.checked ? 'bg-slate-300 dark:bg-slate-600' : style.bgSolid}`}></div>
-                <div className="flex-shrink-0 ml-2 mr-3" onClick={(e) => e.stopPropagation()}>
-                    <button
-                        onClick={() => { toggleCheck(item.id); triggerHaptic(20); }}
-                        className={`rounded-full border-2 flex items-center justify-center transition-all ${item.checked
-                            ? 'border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white'
-                            : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 bg-transparent text-transparent'
-                            } ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}
-                    >
-                        <Check size={viewMode === 'compact' ? 10 : 14} className={item.checked ? 'opacity-100' : 'opacity-0'} />
-                    </button>
-                </div>
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.checked && !isPlannerMode ? 'bg-slate-300 dark:bg-slate-600' : style.bgSolid}`}></div>
+
+                {/* Left side: Trash for planner, Checkbox for shopping */}
+                {isPlannerMode ? (
+                    <div className="flex-shrink-0 ml-1 mr-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={(e) => handleRemoveFromList(item.id, e)}
+                            className={`w-9 h-9 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition`}
+                        >
+                            <Trash2 size={viewMode === 'compact' ? 14 : 18} />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="flex-shrink-0 ml-2 mr-3" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => { toggleCheck(item.id); triggerHaptic(20); }}
+                            className={`rounded-full border-2 flex items-center justify-center transition-all ${item.checked
+                                ? 'border-slate-400 bg-slate-400 dark:border-slate-600 dark:bg-slate-600 text-white'
+                                : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 bg-transparent text-transparent'
+                                } ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}
+                        >
+                            <Check size={viewMode === 'compact' ? 10 : 14} className={item.checked ? 'opacity-100' : 'opacity-0'} />
+                        </button>
+                    </div>
+                )}
+
                 <div className="flex-grow overflow-hidden py-1">
-                    <p className={`font-bold truncate transition-all ${item.checked
+                    <p className={`font-bold truncate transition-all ${item.checked && !isPlannerMode
                         ? 'line-through text-slate-400'
                         : 'text-slate-700 dark:text-slate-200'} ${viewMode === 'compact' ? 'text-xs' : (viewMode === 'grid' ? 'text-[11px]' : 'text-sm')}`}>
                         {item.name}
@@ -158,25 +235,17 @@ const ListView = () => {
                         </p>
                     )}
                 </div>
-                {appMode === 'planning' && (
+
+                {/* Right side: Edit button for planner mode */}
+                {isPlannerMode && (
                     <div className="flex items-center pr-1 h-full gap-2 pl-2">
-                        {!item.checked && (
-                            <button
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onTouchStart={(e) => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
-                                className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition"
-                            >
-                                <Pen size={16} />
-                            </button>
-                        )}
                         <button
                             onMouseDown={(e) => e.stopPropagation()}
                             onTouchStart={(e) => e.stopPropagation()}
-                            onClick={(e) => handleDelete(item.id, e)}
-                            className={`w-9 h-9 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition`}
+                            onClick={(e) => { e.stopPropagation(); setEditingItem(item); }}
+                            className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition"
                         >
-                            <Trash2 size={18} />
+                            <Pen size={16} />
                         </button>
                     </div>
                 )}
@@ -184,20 +253,98 @@ const ListView = () => {
         );
     };
 
-    const CompletedSection = () => {
-        if (showCompletedInline || completedItems.length === 0) return null;
+    // Handler for removing from list (planner mode)
+    const handleRemoveFromList = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        removeFromList(id);
+        triggerHaptic(20);
+    };
+
+    // Handler for adding back to list from previously used
+    const handleAddBackToList = (id: string) => {
+        addBackToList(id);
+        triggerHaptic(20);
+    };
+
+    // Section for "Previously Used" items (planner mode only)
+    const PreviouslyUsedSection = () => {
+        if (appMode !== 'planning' || previouslyUsedItems.length === 0) return null;
         return (
             <div className={`mt-8 mb-8 pt-6 border-t border-dashed border-slate-200 dark:border-slate-700/50 opacity-60 hover:opacity-100 transition-opacity`}>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
-                    <span>{t.completed}</span>
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">{completedItems.length}</span>
-                    {completedItems.length > 0 && (
+                    <span>{(t as any).previouslyUsed || 'Utilizados anteriormente'}</span>
+                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">{previouslyUsedItems.length}</span>
+                    {previouslyUsedItems.length > 0 && (
                         <button
-                            onClick={() => { if (confirm(t.clearComp + '?')) { clearCompleted(); triggerHaptic(20); } }}
+                            onClick={() => { if (confirm(t.clearComp + '?')) { clearPreviouslyUsed(); triggerHaptic(20); } }}
                             className="ml-2 text-[10px] font-bold text-red-400 hover:text-red-500 bg-red-50 dark:bg-red-900/10 px-2 py-1 rounded-md transition uppercase tracking-wider hover:bg-red-100"
                         >
                             {t.clearComp}
                         </button>
+                    )}
+                </h3>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
+                    {previouslyUsedItems.map(item => {
+                        return (
+                            <div
+                                key={item.id}
+                                onClick={() => handleAddBackToList(item.id)}
+                                className={`group relative flex items-center rounded-xl transition-all border shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] select-none ${getItemClass()} bg-slate-50 dark:bg-slate-800/40 border-transparent opacity-70 hover:opacity-100`}
+                            >
+                                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-slate-300 dark:bg-slate-600`}></div>
+                                <div className="flex-shrink-0 ml-2 mr-3">
+                                    <div className={`rounded-full border-2 flex items-center justify-center border-slate-300 dark:border-slate-600 text-slate-400 ${viewMode === 'compact' ? 'w-5 h-5' : 'w-6 h-6'}`}>
+                                        <RotateCcw size={viewMode === 'compact' ? 10 : 12} />
+                                    </div>
+                                </div>
+                                <div className="flex-grow overflow-hidden py-1">
+                                    <p className={`font-bold truncate text-slate-400 ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}>
+                                        {item.name}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
+    // Section for "Completed" items (shopping mode only)
+    const CompletedSection = () => {
+        if (appMode !== 'shopping' || showCompletedInline || completedItems.length === 0) return null;
+        return (
+            <div className={`mt-8 mb-8 pt-6 border-t border-dashed border-slate-200 dark:border-slate-700/50 opacity-60 hover:opacity-100 transition-opacity`}>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-center gap-2 flex-wrap">
+                    <span>{t.completed}</span>
+                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">{completedItems.length}</span>
+                    {completedItems.length > 0 && (
+                        <>
+                            <button
+                                onClick={() => { if (confirm(t.clearComp + '?')) { clearCompleted(); triggerHaptic(20); } }}
+                                className="ml-2 text-[10px] font-bold text-red-400 hover:text-red-500 bg-red-50 dark:bg-red-900/10 px-2 py-1 rounded-md transition uppercase tracking-wider hover:bg-red-100"
+                            >
+                                {t.clearComp}
+                            </button>
+                            {autoClearTimeLeft !== null ? (
+                                <button
+                                    onClick={() => { cancelAutoClear(); triggerHaptic(20); }}
+                                    className="ml-1 text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-md transition uppercase tracking-wider hover:bg-amber-100 flex items-center gap-1"
+                                >
+                                    <Clock size={10} />
+                                    {formatTime(autoClearTimeLeft)}
+                                    <X size={10} />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => { scheduleAutoClear(); triggerHaptic(20); }}
+                                    className="ml-1 text-[10px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md transition uppercase tracking-wider hover:bg-blue-100 flex items-center gap-1"
+                                >
+                                    <Clock size={10} />
+                                    {(t as any).autoClear || 'Autolimpiar'} 1h
+                                </button>
+                            )}
+                        </>
                     )}
                 </h3>
                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
@@ -211,7 +358,7 @@ const ListView = () => {
                             appMode={appMode}
                             toggleCheck={toggleCheck}
                             setEditingItem={setEditingItem}
-                            handleDelete={handleDelete}
+                            handleRemoveFromList={handleRemoveFromList}
                             getItemClass={getItemClass}
                         />;
                     })}
@@ -385,7 +532,7 @@ const ListView = () => {
                                             appMode={appMode}
                                             toggleCheck={toggleCheck}
                                             setEditingItem={setEditingItem}
-                                            handleDelete={handleDelete}
+                                            handleRemoveFromList={handleRemoveFromList}
                                             getItemClass={getItemClass}
                                         />
                                     ))}
@@ -407,7 +554,7 @@ const ListView = () => {
                                         appMode={appMode}
                                         toggleCheck={toggleCheck}
                                         setEditingItem={setEditingItem}
-                                        handleDelete={handleDelete}
+                                        handleRemoveFromList={handleRemoveFromList}
                                         getItemClass={getItemClass}
                                     />;
                                 })}
@@ -416,6 +563,7 @@ const ListView = () => {
                     )
                 )}
 
+                <PreviouslyUsedSection />
                 <CompletedSection />
             </div>
 

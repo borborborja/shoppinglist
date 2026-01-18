@@ -211,6 +211,9 @@ const SettingsModal = ({ onClose, installPrompt, onInstall }: SettingsModalProps
         // Push merged/synced data to remote
         pb.collection('shopping_lists').update(recordId, { data: { items: data.items, categories: data.categories, listName: data.listName } }).catch(console.error);
 
+        // Load custom categories and items for this list
+        useShopStore.getState().loadListCustomData();
+
         // Subscribe to updates - wrap in try/catch to avoid errors during subscription
         try {
             pb.collection('shopping_lists').unsubscribe('*').catch(() => { });
