@@ -11,7 +11,24 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
 </p>
 
+<p align="center">
+  <a href="./docs/en/README.md">🇬🇧 English Version</a> | 🇪🇸 <strong>Versión en Español</strong>
+</p>
+
 **ShoppingList** es una aplicación de lista de la compra moderna, auto-alojable y diseñada para la velocidad. Sincroniza en tiempo real entre todos los dispositivos de tu familia, funciona sin internet y ofrece una experiencia visual de primera clase.
+
+---
+
+## 📚 Documentación
+
+Para obtener información detallada sobre partes específicas del proyecto, consulta los siguientes documentos:
+
+*   🚀 **[Instalación](docs/es/SETUP.md)**: Guía paso a paso para configurar tu entorno de desarrollo y desplegar el servidor.
+*   📱 **[App Web / PWA](docs/es/WEB.md)**: Características del cliente web, modo offline y sincronización.
+*   👑 **[Panel de Administración](docs/es/ADMIN.md)**: Cómo gestionar el catálogo, usuarios y ajustes del servidor.
+*   🤖 **[Android App](docs/es/ANDROID.md)**: Proceso de compilación, firma y publicación en tiendas.
+*   🏗️ **[Arquitectura](docs/es/ARCHITECTURE.md)**: Detalles técnicos sobre el stack, modelo de datos y flujo de información.
+*   📖 **[API & Database](docs/es/API.md)**: La "Biblia" para desarrolladores externos que quieran conectar con el servidor.
 
 ---
 
